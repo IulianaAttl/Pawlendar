@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Manage Account</title>
+		<link rel="icon" type="image/x-icon" href="./images/logo.ico">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="https://kit.fontawesome.com/b56caf5f15.js" crossorigin="anonymous"></script>
+		<style>
+			*{
+				box-sizing: border-box;
+			}
+
+			body{
+				padding: 10px;
+				background: #f1f1f1;
+			}
+			
+			.header{
+				padding: 30px;
+				text-align: center;
+				background: white;
+			}
+			
+			.header h1{
+				font-size: 50px;
+			}
+
+			.column{
+				float: left;
+				width: 100%;
+			}
+			
+			.card{
+				background-color: white;
+				padding: 20px;
+				margin-top: 20px;
+				border-radius: 20px;
+			}
+			
+			.footer{
+				padding: 20px;
+				text-align: center;
+				background: #ddd;
+				margin-top: 20px;
+			}
+
+			@media screen and (max-width: 400px){
+				.topnav a{
+					float: none;
+					width: 100%;
+				}
+			}
+			
+			.row:after{
+				content: "";
+				display: table;
+				clear: both;
+			}
+			
+			ul{
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #333;
+			}
+			
+			li{
+				float: left;
+			}
+			
+			li a, .dropbtn{
+				display: inline-block;
+				color: white;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+			}
+			
+			li a:hover, .dropdown:hover .dropbtn{
+				background-color: red;
+			}
+			
+			li.dropdown{
+				display: inline-block;
+			}
+			
+			.dropdown-content{
+				display: none;
+				position: absolute;
+				background-color: #f9f9f9;
+				min-width: 160px;
+				right: 0;
+				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				z-index: 1;
+			}
+			
+			.dropdown-content a{
+				color: black;
+				padding: 12px 16px;
+				text-decoration: none;
+				display: block;
+			}
+			
+			.dropdown-content a:hover {
+				background-color: #f1f1f1
+			}
+			
+			.dropdown:hover .dropdown-content{
+				display: block;
+			}
+			
+			input[type=text], select{
+				width: 100%;
+				padding: 12px 20px;
+				margin: 8px 0;
+				display: inline-block;
+				border: 1px solid #cccccc;
+				border-radius: 15px;
+				box-sizing: border-box;
+			}
+
+			input[type=submit]{
+				width: 100%;
+				background-color: black;
+				color: white;
+				padding: 14px 20px;
+				margin: 8px 0;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+
+			input[type=submit]:hover{
+				background-color: #666666;
+			}
+
+			.formdiv{
+				border-radius: 5px;
+				padding: 30px;
+				border-color: white;
+				border: 20px;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<font face="Kristen ITC">
+			<div class="header">
+				<img src="./images/logo.png" alt="Pawlendar logo">
+				<h1>Pawlendar</h1>
+			</div>
+			<ul>
+				<li><a href="profile.html">My Profile</a></li>
+				<li><a href="findusers.html">Find Users</a></li>
+				<li><a href="messages.html">Messages</a></li>
+				<li style="float:right" class="dropdown">
+				<a class="dropbtn" ><i class="far fa-user"></i></a>
+				<div class="dropdown-content">
+				<a><u>Manage Account</u></a>
+				<a>Logout</a>
+				</div>
+				</li>
+				<li style="float:right"><a href="notifications.html"><i class="far fa-bell"></i></a></li>
+			</ul>
+			
+			<div class="row">
+				<div class="column">
+					<div class="card">
+						<h2><u>Add a pet</u><br></h2>
+						<div class="formdiv">
+						
+							<form id="petForm" action="http://localhost:8080/Pawlendar/rest/createPet/" method="post">
+							<script>
+							var form = document.getElementById("petForm");
+							form.action += localStorage.getItem("emailLoggedin");
+						</script>
+					<label for="name"> Pet name: </label>
+					<input id="name" type="text" name="name" placeholder="Your pet's name..."/>
+					<label for="gender"> Gender: </label>
+					<input id="gender" type="text" name="gender" placeholder="Your pet's gender..."/>
+					<label for="weight"> Weight: </label>
+					<input id="weight" type="text" name="weight" placeholder="Your pet's weight..."/>
+					<label for="species"> Species: </label>
+					<input id="species" type="text" name="species" placeholder="Your pet's species..."/>
+					<label for="breed"> Breed: </label>
+					<input id="breed" type="text" name="breed" placeholder="Your pet's breed..."/>
+					<label for="colour"> Colour: </label>
+					<input id="colour" type="text" name="colour" placeholder="Your pet's colour..."/>
+					<label for="dob"> DOB: </label>
+					<input id="dob" type="text" name="dob" placeholder="Your pet's DOB..."/>
+					<label for="moreinfo"> More info: </label>
+					<input id="moreinfo" type="text" name="moreinfo" placeholder="More information about your pet..."/>
+					<label for="height"> Height: </label>
+					<input id="height" type="text" name="height" placeholder="Your pet's DOB..."/>
+					<label for="age"> Age: </label>
+					<input id="age" type="text" name="age" placeholder="Your pet's DOB..."/>
+					<input type="submit" value="Create pet"/>
+				</form>
+						
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="footer">
+				<h2>Footer</h2>
+			</div>
+		</font>
+	</body>
+</html>

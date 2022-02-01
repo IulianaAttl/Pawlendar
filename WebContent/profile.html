@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My Profile</title>
+		<link rel="icon" type="image/x-icon" href="./images/logo.ico">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="https://kit.fontawesome.com/b56caf5f15.js" crossorigin="anonymous"></script>
+		<style>
+			*{
+				box-sizing: border-box;
+			}
+
+			body{
+				padding: 10px;
+				background: #f1f1f1;
+			}
+			
+			.header{
+				padding: 30px;
+				text-align: center;
+				background: white;
+			}
+			
+			.header h1{
+				font-size: 50px;
+			}
+
+			.leftcolumn{
+				float: left;
+				width: 75%;
+			}
+			
+			.rightcolumn{
+				float: left;
+				width: 25%;
+				background-color: #f1f1f1;
+				padding-left: 20px;
+			}
+			
+			.card{
+				background-color: white;
+				padding: 20px;
+				margin-top: 20px;
+				border-radius: 20px;
+			}
+			
+			.row:after{
+				content: "";
+				display: table;
+				clear: both;
+			}
+			
+			.footer{
+				padding: 20px;
+				text-align: center;
+				background: #ddd;
+				margin-top: 20px;
+			}
+
+			/*responsive layout - when the screen is minoimized the columns stack on top of eachother */
+			@media screen and (max-width:900px){
+				.leftcolumn, .rightcolumn{
+					width: 100%;
+					padding: 0;
+				}
+			}
+			
+			@media screen and (max-width: 400px){
+				.topnav a{
+					float: none;
+					width: 100%;
+				}
+			}
+			
+			ul{
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #333;
+			}
+			
+			li{
+				float: left;
+			}
+			
+			li a, .dropbtn{
+				display: inline-block;
+				color: white;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+			}
+			
+			li a:hover, .dropdown:hover .dropbtn{
+				background-color: red;
+			}
+			
+			li.dropdown{
+				display: inline-block;
+			}
+			
+			.dropdown-content{
+				display: none;
+				position: absolute;
+				background-color: #f9f9f9;
+				min-width: 160px;
+				right: 0;
+				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				z-index: 1;
+			}
+			
+			.dropdown-content a{
+				color: black;
+				padding: 12px 16px;
+				text-decoration: none;
+				display: block;
+			}
+			
+			.dropdown-content a:hover {
+				background-color: #f1f1f1
+			}
+			
+			.dropdown:hover .dropdown-content{
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<font face="Kristen ITC">
+			<div class="header">
+				<img src="./images/logo.png" alt="Pawlendar logo">
+				<h1>Pawlendar</h1>
+			</div>
+			<ul>
+				<li style="background-color: red"><a><u>My Profile</u></a></li>
+				<li><a href="findusers.html">Find Users</a></li>
+				<li><a href="messages.html">Messages</a></li>
+				<li style="float:right" class="dropdown">
+				<a class="dropbtn"><i class="far fa-user"></i></a>
+				<div class="dropdown-content">
+				<a href="manageinfo.html">Manage Account</a>
+				<a>Logout</a>
+				</div>
+				</li>
+				<li style="float:right"><a href="notifications.html"><i class="far fa-bell"></i></a></li>
+			</ul>
+			
+			<div class="row">
+				<div class="leftcolumn">
+					<div class="card">
+						<h2><u>About Me</u><br></h2>
+						<i class="fas fa-user"></i></i><label for="username"> Username: </label>
+						<p id="result1"></p>
+						<i class="fas fa-globe-americas"></i><label for="location"> Location: </label>
+						<p id="result2"></p>
+						<i class="fas fa-address-card"></i><label for="bio"> Bio: </label>
+						<p id="result3"></p>
+						<script>
+						//XMLHttpRequest object can be used to request data from a web server
+						//create the request
+						var xhttp = new XMLHttpRequest();
+						//function to be executed every time the status of the request object changes
+						xhttp.onreadystatechange = function(){
+						//when these conditions are met then the response is ready
+						if(this.readyState == 4 && this.status == 200){
+							//the response text returns the server response as a string
+							document.getElementById("result1").innerHTML = this.responseText;
+						}
+					};
+					var url = "http://localhost:8080/Pawlendar/rest/getUsername/" + localStorage.getItem("emailLoggedin");
+					xhttp.open("GET", url, true);
+					xhttp.send();
+
+							</script>
+							<script>
+						//XMLHttpRequest object can be used to request data from a web server
+						//create the request
+						var xhttp = new XMLHttpRequest();
+						//function to be executed every time the status of the request object changes
+						xhttp.onreadystatechange = function(){
+						//when these conditions are met then the response is ready
+						if(this.readyState == 4 && this.status == 200){
+							//the response text returns the server response as a string
+							document.getElementById("result2").innerHTML = this.responseText;
+						}
+					};
+					var url = "http://localhost:8080/Pawlendar/rest/getLocation/" + localStorage.getItem("emailLoggedin");
+					xhttp.open("GET", url, true);
+					xhttp.send();
+
+							</script>
+							<script>
+						//XMLHttpRequest object can be used to request data from a web server
+						//create the request
+						var xhttp = new XMLHttpRequest();
+						//function to be executed every time the status of the request object changes
+						xhttp.onreadystatechange = function(){
+						//when these conditions are met then the response is ready
+						if(this.readyState == 4 && this.status == 200){
+							//the response text returns the server response as a string
+							document.getElementById("result3").innerHTML = this.responseText;
+						}
+					};
+					var url = "http://localhost:8080/Pawlendar/rest/getBio/" + localStorage.getItem("emailLoggedin");
+					xhttp.open("GET", url, true);
+					xhttp.send();
+
+							</script>
+					</div>
+					<div class="card">
+						<h2><u>My Pets</u><br></h2>
+						<form action="http://localhost:8080/Pawlendar/addPet.html">
+							<input type="submit" value="Add Pet" /><br>
+						</form>
+						<p id="resultPets"></p>
+						<script>
+						//XMLHttpRequest object can be used to request data from a web server
+						//create the request
+						var xhttp = new XMLHttpRequest();
+						//function to be executed every time the status of the request object changes
+						xhttp.onreadystatechange = function(){
+						//when these conditions are met then the response is ready
+						if(this.readyState == 4 && this.status == 200){
+							//the response text returns the server response as a string
+							document.getElementById("resultPets").innerHTML = this.responseText;
+						}
+					};
+					var url = "http://localhost:8080/Pawlendar/rest/getPets/" + localStorage.getItem("emailLoggedin");
+					xhttp.open("GET", url, true);
+					xhttp.send();
+
+							</script>
+					</div>
+					<div class="card">
+						<h2><u>My Posts</u><br></h2>
+					</div>
+					<div class="card">
+						<h2><u>My Tasks</u><br></h2>
+					</div>
+				</div>
+				<div class="rightcolumn">
+					<div class="card">
+						<h3><u>Badges</u></h3>
+					</div>
+					<div class="card">
+						<h3><u>Followers</u></h3>
+					</div>
+					<div class="card">
+						<h3><u>Following</u></h3>
+					</div>
+				</div>
+				
+			</div>
+			
+			<div class="footer">
+				<h2>Footer</h2>
+			</div>
+		</font>
+	</body>
+</html>
