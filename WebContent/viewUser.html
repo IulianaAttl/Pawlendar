@@ -42,7 +42,7 @@
 				<div class="collapse navbar-collapse" id="navbarNav">
 					<ul class="navbar-nav">
 						<li class="nav-item">
-							<a class="nav-link active">My Profile</a>
+							<a class="nav-link" href="profile.html">My Profile</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="findusers.html">Find Users</a>
@@ -94,9 +94,12 @@
 					<p id="result2"></p>
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-quote-fill" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2zm7.194 2.766a1.688 1.688 0 0 0-.227-.272 1.467 1.467 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 5.734 4C4.776 4 4 4.746 4 5.667c0 .92.776 1.666 1.734 1.666.343 0 .662-.095.931-.26-.137.389-.39.804-.81 1.22a.405.405 0 0 0 .011.59c.173.16.447.155.614-.01 1.334-1.329 1.37-2.758.941-3.706a2.461 2.461 0 0 0-.227-.4zM11 7.073c-.136.389-.39.804-.81 1.22a.405.405 0 0 0 .012.59c.172.16.446.155.613-.01 1.334-1.329 1.37-2.758.942-3.706a2.466 2.466 0 0 0-.228-.4 1.686 1.686 0 0 0-.227-.273 1.466 1.466 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 10.07 4c-.957 0-1.734.746-1.734 1.667 0 .92.777 1.666 1.734 1.666.343 0 .662-.095.931-.26z"/></svg>
 					<label for="bio"> Bio: </label>
-					<div class="overflow-auto" syle="width: 250px; height: 80px; overflow: auto;"><p id="result3"></p></div>
+					<div class="overflow-auto"><p id="result3"></p></div>
 					
 					<script>
+						const urlString = window.location.search;
+						const urlParam = new URLSearchParams(urlString);
+						const email = urlParam.get('email');
 						//XMLHttpRequest object can be used to request data from a web server
 						//create the request
 						var xhttp = new XMLHttpRequest();
@@ -109,7 +112,7 @@
 								document.getElementById("welcomeProfile").innerHTML = this.responseText + "'s Profile";
 							}
 						};
-						var url = "http://localhost:8080/Pawlendar/rest/getUsername/" + localStorage.getItem("emailLoggedin");
+						var url = "http://localhost:8080/Pawlendar/rest/getUsername/" + email;
 						xhttp.open("GET", url, true);
 						xhttp.send();
 					</script>
@@ -125,7 +128,7 @@
 								document.getElementById("result2").innerHTML = this.responseText;
 							}
 						};
-						var url = "http://localhost:8080/Pawlendar/rest/getLocation/" + localStorage.getItem("emailLoggedin");
+						var url = "http://localhost:8080/Pawlendar/rest/getLocation/" + email;
 						xhttp.open("GET", url, true);
 						xhttp.send();
 					</script>
@@ -141,7 +144,7 @@
 								document.getElementById("result3").innerHTML = this.responseText;
 							}
 						};
-						var url = "http://localhost:8080/Pawlendar/rest/getBio/" + localStorage.getItem("emailLoggedin");
+						var url = "http://localhost:8080/Pawlendar/rest/getBio/" + email;
 						xhttp.open("GET", url, true);
 						xhttp.send();
 					</script>
@@ -163,7 +166,7 @@
 								document.getElementById("badgeResult").innerHTML = this.responseText;
 							}
 						};
-						var url = "http://localhost:8080/Pawlendar/rest/getBadges/" + localStorage.getItem("emailLoggedin");
+						var url = "http://localhost:8080/Pawlendar/rest/getBadges/" + email;
 						xhttp.open("GET", url, true);
 						xhttp.send();
 					</script>
@@ -195,14 +198,9 @@
 							
 						</div>
 						<div class="tab-pane fade" id="pets" role="tabpanel" aria-labelledby="pets-tab">
-						
 							<div class="row">
 								<div class="col">
 								<br>
-									<form action="http://localhost:8080/Pawlendar/addPet.html">
-										<input class="btn btn-secondary" type="submit" value="Add Pet" /><br>
-									</form>
-									<br>
 									<p id="resultPets"></p>
 									<script>
 										//XMLHttpRequest object can be used to request data from a web server
@@ -216,106 +214,16 @@
 												document.getElementById("resultPets").innerHTML = this.responseText;
 											}
 										};
-										var url = "http://localhost:8080/Pawlendar/rest/getPets/" + localStorage.getItem("emailLoggedin");
+										var url = "http://localhost:8080/Pawlendar/rest/getPets/" + email;
 										xhttp.open("GET", url, true);
 										xhttp.send();
 									</script>
 								</div>
 							</div>
-							
 						</div>
-						
 						<div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
 						<br>
-							<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#taskModal">Add a task</button>
-							<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModal" aria-hidden="true">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<form id="addTaskForm" action="http://localhost:8080/Pawlendar/rest/createTask/" method="post">
-											<script>
-												var link = document.getElementById("addTaskForm");
-												var email = localStorage.getItem("emailLoggedin");
-												link.action = "http://localhost:8080/Pawlendar/rest/createTask/" + email;
-											</script>
-											
-											<div class="modal-header">
-												<h5 class="modal-title" id="foodModalLabel">Add a task</h5>
-												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-											</div>
-											<div class="modal-body">
-												<div class="mb-3">
-													<label for="title" class="form-label">Title</label>
-													<input type="text" class="form-control" name="title" id="title" placeholder="Title">
-												</div>
-												<div class="mb-3">
-													<label for="date" class="form-label">Date</label>
-													<input type="date" class="form-control" name="date" id="date" placeholder="Date">
-												</div>
-												<div class="mb-3">
-													<label for="time" class="form-label">Time</label>
-													<input type="time" class="form-control" name="time" id="time" placeholder="Time">
-												</div>
-												<div class="mb-3">
-													<label for="petList" class="form-label">Pet</label>
-													<select id="resultPetsForTask" type="text" class="form-control" name="petList" id="petList" placeholder="Pet" required>
-														<script>
-														//XMLHttpRequest object can be used to request data from a web server
-														//create the request
-														var xhttp = new XMLHttpRequest();
-														//function to be executed every time the status of the request object changes
-														xhttp.onreadystatechange = function(){
-															//when these conditions are met then the response is ready
-															if(this.readyState == 4 && this.status == 200){
-															//the response text returns the server response as a string
-																document.getElementById("resultPetsForTask").innerHTML = this.responseText;
-															}
-														};
-														var url = "http://localhost:8080/Pawlendar/rest/getPetsForTask/" + localStorage.getItem("emailLoggedin");
-														xhttp.open("GET", url, true);
-														xhttp.send();
-														</script>
-													</select>
-												</div>
-												<div class="mb-3">
-													<label for="content" class="form-label">Content</label>
-													<input type="text" class="form-control" name="content" id="content" placeholder="Content">
-												</div>
-												<div class="mb-3">
-												Repeat: 
-												<br>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" name="radioButton" id="everyDayRadio">
-														<label class="form-check-label" for="everyDayRadio">every day</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" name="radioButton" id="everyWeekRadio">
-														<label class="form-check-label" for="everyWeekRadio">every week</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" name="radioButton" id="everyYearRadio">
-														<label class="form-check-label" for="everyYearRadio">every year</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" name="radioButton" id="neverRadio" checked>
-														<label class="form-check-label" for="neverRadio">never</label>
-													</div>
-												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-												<input type="submit" class="btn btn-secondary">
-											</div>
-										</form>
-										
-									</div>
-								</div>
-							</div>
-							<button type="button" class="btn btn-secondary">View Archive</button>
-							
-							<br>
-							<br>
-							
-							
+						<br>
 							<table class="col-12">
 								<thead>
 									<tr>
@@ -340,7 +248,7 @@
 												document.getElementById("resultTasks").innerHTML = this.responseText;
 											}
 										};
-										var url = "http://localhost:8080/Pawlendar/rest/getTasks/" + localStorage.getItem("emailLoggedin");
+										var url = "http://localhost:8080/Pawlendar/rest/getTasksViewUser/" + email;
 										xhttp.open("GET", url, true);
 										xhttp.send();
 									</script>
@@ -348,7 +256,7 @@
 							</table>
 							
 							<script>
-								function removeTask(i){
+								function addToMine(i){
 									//XMLHttpRequest object can be used to request data from a web server
 									//create the request
 									var xhttp = new XMLHttpRequest();
@@ -360,10 +268,9 @@
 											document.getElementById("resultTasks").innerHTML = this.responseText;
 										}
 									};
-									var url = "http://localhost:8080/Pawlendar/rest/removeTask/" + i + "/" + localStorage.getItem("emailLoggedin");
-									xhttp.open("DELETE", url, true);
+									var url = "http://localhost:8080/Pawlendar/rest/addTaskFromUser/" + i + "/" + email + "/" + localStorage.getItem("emailLoggedin");
+									xhttp.open("GET", url, true);
 									xhttp.send();
-									window.location.reload();
 								}
 								
 							</script>

@@ -1,24 +1,26 @@
 package entities;
 
+//imports
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 //POJO to correctly model Users
 @Entity
 @NamedQueries({
-	@NamedQuery(name = "User.findAll", query = "select o from User o"), 
-	@NamedQuery(name = "User.findByEmail", query = "select o from User o where o.email=:email"),
+	@NamedQuery(name = "User.findAll", query = "select o from User o")
 })
 public class User {
 	
@@ -35,21 +37,28 @@ public class User {
 	private String password;
 	private String location;
 	private String bio;
-	
-	//a user has a list of badges
+	private int timesLoggedIn;
 	
 	//a user can have many pets
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@OneToMany
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Pet> pets = new ArrayList<Pet>();
 	
 //	//a user can create many posts
 //	@OneToMany
 //	private List<Post> posts = new ArrayList<Post>();
 //	
-//	//a user can create many tasks
-//	@OneToMany
-//	private List<Task> tasks = new ArrayList<Task>();
-//	
+	//a user can create many tasks
+	@ManyToMany
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private List<Task> tasks = new ArrayList<Task>();
+	
+	//a user has a list of badges
+	@ManyToMany
+	@LazyCollection(LazyCollectionOption.FALSE)
+	private List<Badge> badges = new ArrayList<Badge>();
+		
+	
 //	//a user can create and have many comments
 //	@OneToMany
 //	private List<Comment> comments = new ArrayList<Comment>();
@@ -60,7 +69,7 @@ public class User {
 	}
 	
 	//constructor
-	public User(String firstName, String lastName, String username, String email, String password, String location, String bio) {
+	public User(String firstName, String lastName, String username, String email, String password, String location, String bio, int timesLoggedIn) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.username = username;
@@ -68,6 +77,7 @@ public class User {
 		this.password = password;
 		this.location = location;
 		this.bio = bio;
+		this.timesLoggedIn = timesLoggedIn;
 	}
 
 	//getters and setters
@@ -141,5 +151,29 @@ public class User {
 
 	public void setPets(List<Pet> pets) {
 		this.pets = pets;
+	}
+
+	public int getTimesLoggedIn() {
+		return timesLoggedIn;
+	}
+
+	public void setTimesLoggedIn(int timesLoggedIn) {
+		this.timesLoggedIn = timesLoggedIn;
+	}
+	
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
+	}
+
+	public List<Badge> getBadges() {
+		return badges;
+	}
+
+	public void setBadges(List<Badge> badges) {
+		this.badges = badges;
 	}
 }
