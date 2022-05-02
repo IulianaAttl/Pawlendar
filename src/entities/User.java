@@ -1,11 +1,8 @@
 package entities;
 
-//imports
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,23 +10,19 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
-//POJO to correctly model Users
 @Entity
 @NamedQueries({
 	@NamedQuery(name = "User.findAll", query = "select o from User o")
 })
 public class User {
 	
-	//primary key in the database
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
-	//declare the variables 
 	private String firstName;
 	private String lastName;
 	private String username;
@@ -44,31 +37,20 @@ public class User {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Pet> pets = new ArrayList<Pet>();
 	
-//	//a user can create many posts
-//	@OneToMany
-//	private List<Post> posts = new ArrayList<Post>();
-//	
-	//a user can create many tasks
+	//a user can have many tasks live
 	@ManyToMany
 	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<Task> tasks = new ArrayList<Task>();
+	private List<Task> liveTasks = new ArrayList<Task>();
 	
 	//a user has a list of badges
 	@ManyToMany
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Badge> badges = new ArrayList<Badge>();
 		
-	
-//	//a user can create and have many comments
-//	@OneToMany
-//	private List<Comment> comments = new ArrayList<Comment>();
-	
-	//empty constructor
 	public User() {
 		
 	}
 	
-	//constructor
 	public User(String firstName, String lastName, String username, String email, String password, String location, String bio, int timesLoggedIn) {
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -80,7 +62,6 @@ public class User {
 		this.timesLoggedIn = timesLoggedIn;
 	}
 
-	//getters and setters
 	public String getFirstName() {
 		return firstName;
 	}
@@ -161,12 +142,12 @@ public class User {
 		this.timesLoggedIn = timesLoggedIn;
 	}
 	
-	public List<Task> getTasks() {
-		return tasks;
+	public List<Task> getLiveTasks() {
+		return liveTasks;
 	}
 
-	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
+	public void setLiveTasks(List<Task> liveTasks) {
+		this.liveTasks = liveTasks;
 	}
 
 	public List<Badge> getBadges() {

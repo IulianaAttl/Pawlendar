@@ -24,6 +24,7 @@ public class Task {
 	private String content;
 	private boolean copied;
 	
+	//task references a pet
 	@OneToOne
 	private Pet pet;
 	

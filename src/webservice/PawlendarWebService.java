@@ -4,6 +4,7 @@ package webservice;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -30,10 +31,6 @@ public class PawlendarWebService{
 
 	//declare the dao
 	PawlendarDAO dao = new PawlendarDAO();
-
-	/*
-	 * User methods
-	 */
 
 	//register a user
 	//if the user doesnt already exist in the database then create a new user with the information entered, save it in the database and redirect the user to their profile page
@@ -99,16 +96,16 @@ public class PawlendarWebService{
   		if(!(firstName.equals(""))) {
   			user.setFirstName(firstName);
   		}
-  		else if(!(lastName.equals(""))) {
+  		if(!(lastName.equals(""))) {
   			user.setLastName(lastName);
   		}
-  		else if(!(username.equals(""))) {
+  		if(!(username.equals(""))) {
   			user.setUsername(username);
   		}
-  		else if(!(location.equals(""))) {
+  		if(!(location.equals(""))) {
   			user.setLocation(location);
   		}
-  		else if(!(bio.equals(""))) {
+  		if(!(bio.equals(""))) {
   			user.setBio(bio);
   		}
   		dao.mergeObject(user);
@@ -135,7 +132,7 @@ public class PawlendarWebService{
 	  				result += "<span class=\"badge rounded-pill bg-secondary\">" + p.getSpecies() + "</span>&nbsp;";
 	  			}
   	  			
-  	  			result += "<a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\">View user profile</a></div></div>&nbsp;";
+  	  			result += "<a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\" onClick=\"localStorage.setItem(\"emailOfUser\"," + u.getEmail() + ");\">View user profile</a></div></div>&nbsp;";
   			}
   		}
   		return result;
@@ -190,27 +187,127 @@ public class PawlendarWebService{
   		List<Badge> badges = new ArrayList<Badge>();
   		badges = dao.getBadgesByEmail(email);
   		for(Badge b : badges) {
-  			result += "<span class=\"badge rounded-pill bg-secondary\">" + b.getName() + "</span>&nbsp;<div class=\"vr\"></div>&nbsp;";
+  			result += "<span class=\"badge rounded-pill bg-secondary\">" + b.getName() + "</span>&nbsp;&nbsp;";
   		}
   		return result;
   	}
   	
-  	/*
-  	 * Task methods
-  	 */
+  	//get the pets for my list in following another pet
+  	@GET
+  	@Path("getPetsForMyList/{email}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetsForMyList(@PathParam("email") String email){
+  		String result = "<option selected disabled value = \"\">Choose a pet ... </option>";
+  		List<Pet> pets = new ArrayList<Pet>();
+  		pets = dao.getPetsByEmail(email);
+  		for(Pet p : pets) {
+  			result += "<option svalue = \"" + p.getName() + "\">" + p.getName() + "</option>";
+  		}
+  		return result;
+  	}
   	
   	//create a task for the logged in user
 	@POST
   	@Path("createTask/{email}")
   	@Produces(MediaType.TEXT_HTML)
-  	public Response createTask(@PathParam("email") String email, @FormParam("title") String title, @FormParam("date") String date, @FormParam("time") String time, @FormParam("content") String content, @FormParam("petList") String petList) throws URISyntaxException{
+  	public Response createTask(@PathParam("email") String email, @FormParam("title") String title, @FormParam("day") int day, @FormParam("month") int month, @FormParam("year") int year, @FormParam("time") String time, @FormParam("content") String content, @FormParam("petList") String petList, @FormParam("repeat") String repeat) throws URISyntaxException{
   		Pet pet = dao.getPetFromUser(email, petList);
-  	  	Task task = new Task(title, date, time, content, pet, false);
   	  	User user = dao.getUserByEmail(email);
-  	  	List<Task> tasks = user.getTasks();
-  	  	dao.persistObject(task);
-  	  	tasks.add(task);
-  	  	user.setTasks(tasks);
+  	  	List<Task> tasks = user.getLiveTasks();
+  	  	int dayChosen = day;
+		int monthChosen = month;
+		int yearChosen = year;
+  	  	if(repeat.equals("everyDay")) {
+  	  		for(int i = 0; i < 365; i++) {
+  	  			if(dayChosen == 29 && monthChosen == 2) {
+  	  				String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+  	  				Task task = new Task(title, date, time, content, pet, false);
+  	  				dao.persistObject(task);
+  	  				tasks.add(task);
+  	  				dayChosen = 1;
+	  				monthChosen = monthChosen + 1;
+  	  			}
+  	  			else if(dayChosen == 30 && (monthChosen == 9 || monthChosen == 4 || monthChosen == 6 || monthChosen == 11)) {
+  	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+	  				Task task = new Task(title, date, time, content, pet, false);
+	  	  			dao.persistObject(task);
+	  	  			tasks.add(task);
+	  	  			dayChosen = 1;
+	  				monthChosen = monthChosen + 1;
+  	  			}
+  	  			else if(dayChosen == 31 && (monthChosen == 1 || monthChosen == 3 || monthChosen == 5 || monthChosen == 7 || monthChosen == 8 || monthChosen == 10)) {
+  	  				
+  	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+	  				Task task = new Task(title, date, time, content, pet, false);
+	  	  			dao.persistObject(task);
+	  	  			tasks.add(task);
+	  	  		dayChosen = 1;
+	  				monthChosen = monthChosen + 1;
+  	  			}
+  	  			else if(dayChosen == 31 && monthChosen == 12) {
+  	  				
+  	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+	  				Task task = new Task(title, date, time, content, pet, false);
+	  	  			dao.persistObject(task);
+	  	  			tasks.add(task);
+	  	  		dayChosen = 1;
+	  				monthChosen = 1;
+	  				yearChosen = yearChosen + 1;
+  	  			}
+  	  			else {
+  	  				
+  	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+	  				Task task = new Task(title, date, time, content, pet, false);
+	  	  			dao.persistObject(task);
+	  	  			tasks.add(task);
+	  	  		dayChosen = dayChosen + 1;
+  	  			}
+  	  		}
+  	  	}
+  	  	else if(repeat.equals("everyMonth")) {
+	  		for(int i = 0; i < 12; i++) {
+	  			if(monthChosen == 13) {
+	  				monthChosen = 1;
+	  				yearChosen = yearChosen + 1;
+	  			}
+	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+	  			Task task = new Task(title, date, time, content, pet, false);
+	  			dao.persistObject(task);
+	  			tasks.add(task);
+	  			monthChosen = monthChosen + 1;
+	  		}
+  	  	}
+  	  	else if(repeat.equals("everyYear")) {
+	  	  	for(int i = 0; i < 5; i++) {
+	  			
+	  	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+				Task task = new Task(title, date, time, content, pet, false);
+	  			dao.persistObject(task);
+	  			tasks.add(task);
+	  			yearChosen = yearChosen + 1;
+	  		}
+  	  	}
+  	  	else if(repeat.equals("never")) {
+  	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
+			Task task = new Task(title, date, time, content, pet, false);
+  	  		dao.persistObject(task);
+  	  		tasks.add(task);
+  	  	}
+  	  	List<Task> taskForFollowers = new ArrayList<Task>();
+  	  	List<User> allUsers = dao.getAllUsers();
+  	  	for(Pet p : pet.getFollowersPets()) {
+  	  		for(User u : allUsers) {
+  	  			if(u.getPets().contains(p)) {
+  	  				for(Task t : tasks) {
+  	  					t.setPet(p);
+  	  					taskForFollowers.add(t);
+  	  				}
+  	  				u.setLiveTasks(taskForFollowers);
+  	  				dao.mergeObject(u);
+  	  			}
+  	  		}
+  	  	}
+  	  	user.setLiveTasks(tasks);
   	  	dao.mergeObject(user);  		
   	  	URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/profile.html");
   		return Response.seeOther(targetURIForRedirection).build();	
@@ -221,14 +318,12 @@ public class PawlendarWebService{
   	@Path("removeTask/{taskId}/{email}")
   	public void removeTask(@PathParam("email") String email, @PathParam("taskId") int taskId){
   	  	User user = dao.getUserByEmail(email);
-  	  	List<Task> tasks = user.getTasks();
+  	  	List<Task> tasks = user.getLiveTasks();
   	  	for(Task t : tasks) {
   	  		if(t.getId() == taskId) {
   	  			dao.remove(t);
   	  		}
-  	  	}
-  	  	user.setTasks(tasks);
-  	  	dao.mergeObject(user);  		
+  	  	}		
   	}
   	
   	//add tasks from the viewed user to the logged in user
@@ -238,8 +333,8 @@ public class PawlendarWebService{
   	public void addTaskFromUser(@PathParam("email") String email, @PathParam("emailLoggedIn") String emailLoggedIn, @PathParam("taskId") int taskId){
   	  	User viewUser = dao.getUserByEmail(email);
   	  	User loggedUser = dao.getUserByEmail(emailLoggedIn);
-  	  	List<Task> viewUserTasks = viewUser.getTasks();
-  	  	List<Task> loggedUserTasks = loggedUser.getTasks();
+  	  	List<Task> viewUserTasks = viewUser.getLiveTasks();
+  	  	List<Task> loggedUserTasks = loggedUser.getLiveTasks();
   	  	
   	  	for(Task t : viewUserTasks) {
   	  		if(t.getId() == taskId) {
@@ -248,7 +343,7 @@ public class PawlendarWebService{
   	  			loggedUserTasks.add(task);
   	  		}
   	  	}
-  	  	loggedUser.setTasks(loggedUserTasks);
+  	  	loggedUser.setLiveTasks(loggedUserTasks);
   	  	dao.mergeObject(loggedUser);  		
   	}
   	
@@ -260,15 +355,10 @@ public class PawlendarWebService{
   		String result = " ";
   		List<Task> tasks = new ArrayList<Task>();
   		tasks = dao.getTasksByEmail(email);
+  		Collections.sort(tasks, new sortTasks());
   		for(Task t : tasks) {
-  			if(t.isCopied() == true) {
-  				Pet pet = t.getPet();
-  	  			result += "<tr bgcolor=\"green\"><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button type=\"submit\" class=\"btn btn-success ms-1\">Completed</button></td></tr>";
-  			}
-  			else {
-  				Pet pet = t.getPet();
-  	  			result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button type=\"submit\" class=\"btn btn-success ms-1\">Completed</button></td></tr>";
-  			}
+  			Pet pet = t.getPet();
+  	  		result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button></td></tr>";	
   		}
   		
   		return result;
@@ -284,7 +374,7 @@ public class PawlendarWebService{
   		tasks = dao.getTasksByEmail(email);
   		for(Task t : tasks) {
   			Pet pet = t.getPet();
-  			result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"addToMine(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-success\">Add to my tasks</button></td></tr>";
+  			result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td></td></tr>";
   		}
   		
   		return result;
@@ -304,120 +394,54 @@ public class PawlendarWebService{
   		return result;
   	}
   	
-  	/*
-  	 * Pet methods
-  	 */
-  	
   	//create a pet
   	@POST
-  	@Path("createPet/{email}")
+  	@Path("createPet/{email1}")
   	@Produces(MediaType.TEXT_HTML)
-  	public void createPet(@PathParam("email") String email, @FormParam("name") String name, @FormParam("gender") String gender, @FormParam("weight") String weight, @FormParam("species") String species, @FormParam("breed") String breed, @FormParam("colour") String colour, @FormParam("dob") String dob, @FormParam("moreinfo") String moreinfo, @FormParam("height") String height){
-  		Pet pet = new Pet(name, gender, weight, species, breed, colour, dob, moreinfo, height, 0);
-  		User user = dao.getUserByEmail(email);
+  	public Response createPet(@PathParam("email1") String email1, @FormParam("petName") String petName, @FormParam("gender") String gender, @FormParam("weight") String weight, @FormParam("species") String species, @FormParam("breed") String breed, @FormParam("colour") String colour, @FormParam("dob") String dob, @FormParam("moreinfoPet") String moreinfoPet, @FormParam("height") String height, @FormParam("type") String type, @FormParam("brand") String brand, @FormParam("timesPerDay") String timesPerDay, @FormParam("quantity") String quantity, @FormParam("moreinfoFood") String moreinfoFood, @FormParam("habitatType") String habitatType, @FormParam("size") String size, @FormParam("bedding") String bedding, @FormParam("temperature") String temperature, @FormParam("timesCleaned") String timesCleaned, @FormParam("moreinfo") String moreinfo, @FormParam("name") String name, @FormParam("address") String address, @FormParam("phoneNumber") String phoneNumber, @FormParam("email") String email, @FormParam("webUrl") String webUrl) throws URISyntaxException{
+  		Pet pet = new Pet(petName, gender, weight, species, breed, colour, dob, moreinfoPet, height, 0);
+  		User user = dao.getUserByEmail(email1);
   		List<Pet> pets = user.getPets();
   		boolean found = false;
   		for(Pet p : pets) {
-  			if(p.getName().equals(name)) {
+  			if(p.getName().equals(petName)) {
   				 found = true;
   			}
   		} 		
   		if(found == false) {
-  			dao.persistObject(pet);
+		  	if(!(type.equals("") && brand.equals("") && timesPerDay.equals("") && quantity.equals("") && moreinfoFood.equals(""))) {
+		  		Food food = new Food(type, brand, timesPerDay, quantity, moreinfoFood);
+		  		dao.persistObject(food);
+		  		pet.setFood(food);
+		  	}
+		  	
+		  	if(!(habitatType.equals("") && size .equals("") && bedding.equals("") && temperature.equals("") && timesCleaned.equals("") && moreinfo.equals(""))) {
+		  		Habitat habitat = new Habitat(habitatType, size, bedding, temperature, timesCleaned, moreinfo);
+	  			dao.persistObject(habitat);
+	  			pet.setHabitat(habitat);
+		  	}
+  			
+		  	if(!(name.equals("") && address.equals("") && phoneNumber.equals("") && email.equals("") && webUrl.equals(""))) {
+		  		Vet vet = new Vet(name, address, phoneNumber, email, webUrl);
+	  	  		dao.persistObject(vet);
+	  	  		pet.setVet(vet);
+		  	}
+		  	
+		  	dao.persistObject(pet);
 		  	pets.add(pet);
 		  	user.setPets(pets);
-		  	dao.mergeObject(user); 
+		  	dao.mergeObject(user);
+  			
+		  	URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/addPet.html?error=false");
+			return Response.temporaryRedirect(targetURIForRedirection).build();
 		  	
   		}
-  	}
-  	
-  	//create food for the pet
-  	@POST
-  	@Path("createFood/{email}/{petName}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public void createFood(@PathParam("email") String email, @PathParam("petName") String petName, @FormParam("type") String type, @FormParam("brand") String brand, @FormParam("timesPerDay") String timesPerDay, @FormParam("quantity") String quantity, @FormParam("moreinfo") String moreinfo){
-  	 	Food food = new Food(type, brand, timesPerDay, quantity, moreinfo);
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		List<Food> foods = pet.getFoods();
-  		boolean found = false;
-  		for (Food f : foods) {
-  			if(f.getType().equals(type) && f.getBrand().equals(brand) && f.getExtraInfo().equals(moreinfo) && f.getQuantity().equals(quantity) && f.getTimesPerDay().equals(timesPerDay)) {
-  				found = true;
-  			}
-  		}
-  		
-  		if(found == false) {
-  			dao.persistObject(food);
-  			foods.add(food);
-  			pet.setFoods(foods);
-  			dao.mergeObject(pet);
+  		else {
+  			URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/addPet.html?error=true");
+			return Response.temporaryRedirect(targetURIForRedirection).build();
   		}
   	}
-  	
-  	//get a pets food
-  	@POST
-  	@Path("getFood/{email}/{petName}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public String getFood(@PathParam("email") String email, @PathParam("petName") String petName){
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		List<Food> foods = pet.getFoods();
-  		String answer = "Foods of this pet: \n";
-  		for(Food f : foods) {
-  			answer = answer +  f.getType() + " " + f.getBrand() + "\n";
-  		}
-		return answer;
-  	}
-  	
-  	//create a habitat for the pet
-  	@POST
-  	@Path("createHabitat/{email}/{petName}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public void createHabitat(@PathParam("email") String email, @PathParam("petName") String petName, @FormParam("type") String type, @FormParam("size") String size, @FormParam("bedding") String bedding, @FormParam("temperature") String temperature, @FormParam("timesCleaned") String timesCleaned, @FormParam("moreinfo") String moreinfo){
-  			Habitat habitat = new Habitat(type, size, bedding, temperature, timesCleaned, moreinfo);
-  			Pet pet = dao.getPetFromUser(email, petName);
-  			List<Habitat> habitats = pet.getHabitats();
-  			boolean found = false;
-  			for (Habitat h : habitats) {
-  				if(h.getBedding().equals(bedding) && h.getMoreInfo().equals(moreinfo) && h.getSize().equals(size) && h.getTemperature().equals(temperature) && h.getTimesCleaned().equals(timesCleaned) && h.getTypeRequired().equals(type)) {
-  					found = true;
-  				}
-  			}
-  			if(found == false) {
-  				dao.persistObject(habitat);
-  				habitats.add(habitat);
-  				pet.setHabitats(habitats);
-  				dao.mergeObject(pet);
-  			}
-  	}
-  	
-  	//get the pets habitat
-  	@POST
-  	@Path("getHabitat/{email}/{petName}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public String getHabitat(@PathParam("email") String email, @PathParam("petName") String petName){
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		List<Habitat> habitats = pet.getHabitats();
-  		String answer = "Habitats of this pet: \n";
-  		for(Habitat h : habitats) {
-  			answer = answer +  h.getTypeRequired() + " " + h.getBedding() + "\n";
-  		}
-		return answer;
-  	}
-  	
-  	//create the vet for the pet
-  	@POST
-  	@Path("createVet/{email1}/{petName}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public Response createVet(@PathParam("email1") String email1, @PathParam("petName") String petName, @FormParam("name") String name, @FormParam("address") String address, @FormParam("phoneNumber") String phoneNumber, @FormParam("email") String email, @FormParam("webUrl") String webUrl) throws URISyntaxException{
-  		Vet vet = new Vet(name, address, phoneNumber, email, webUrl);
-  		Pet pet = dao.getPetFromUser(email1, petName);
-  		dao.persistObject(vet);
-  		pet.setVet(vet);
-  		dao.mergeObject(pet);
-  		URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/profile.html");
-		return Response.seeOther(targetURIForRedirection).build();
-  	}
-
+  	 	
   	//get the pets for a user
   	@GET
   	@Path("getPets/{email}")
@@ -428,11 +452,13 @@ public class PawlendarWebService{
   		pets = dao.getPetsByEmail(email);
   		int i = 0;
   		for(Pet p : pets) {
-  			result += "<div class=\"card\" style=\"width: 18rem;\">\r\n"
+  			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
   					+ "  <div class=\"card-body\">\r\n"
   					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + p.getName() + "</h5>\r\n"
   					+ "    <p class=\"card-text\"><span class=\"badge rounded-pill bg-secondary\">" + p.getSpecies() + "</span>&nbsp;<span class=\"badge rounded-pill bg-secondary\">" + p.getBreed() + "</span></p>\r\n"
-  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + p.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n"
+  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + p.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "
+  					+ "    <button onClick=\"removePet(" + p.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete pet</button>"
+  					+ "	   <a href=\"http://localhost:8080/Pawlendar/findusers.html?findExpertSpecies=" + p.getSpecies() +"\" class=\"btn btn-secondary\">Find an expert</a>\r\n"					
   					+ "  </div>\r\n"
   					+ "</div>&nbsp;";
   			i = i + 1;
@@ -441,65 +467,546 @@ public class PawlendarWebService{
   	}
   	
   	@GET
-  	@Path("getPetInformation/{email}/{petName}")
+  	@Path("getFollowers/{email}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getPetInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		String result = "Pet Information\n";
-  		result = result + "Name: " + pet.getName() + "\nGender: " + pet.getGender() + "\nWeight: " + pet.getWeight() + "\nSpecies: " + pet.getSpecies() + "\nBreed: " + pet.getBreed() + "\nColour: " + pet.getColour() + "\nDOB: " + pet.getDob() + "\nHeight: " + pet.getHeight() + "\nMore Info: " + pet.getMoreinfo();
+  	public String getFollowers(@PathParam("email") String email){
+  		String result = "<h4>My Followers</h4><br>";
+  		User user = dao.getUserByEmail(email);
+  		List<Pet> pets = user.getPets();
+  		List<Pet> followers = new ArrayList<Pet>();
+  		
+  		for(Pet p : pets) {
+  			for(Pet u : p.getFollowersPets()) {
+  				followers.add(u);
+  			}
+  		}
+  		
+  		int i = 0;
+  		for(Pet u : followers) {
+  			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
+  					+ "  <div class=\"card-body\">\r\n"
+  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + u.getName()+ "</h5>\r\n"	
+  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + u.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "
+  					+ "  </div>\r\n"
+  					+ "</div>&nbsp;";
+  			i = i + 1;
+  		}
   		return result;
   	}
-  	
   	@GET
-  	@Path("getFoodInformation/{email}/{petName}")
+  	@Path("getFollowing/{email}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getFoodInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		String result = "Food Information\n";
-  		List<Food> foods = pet.getFoods();
-  		for(Food f : foods) {
-  			result = result + "Type: " + f.getType() + "\nBrand: " + f.getBrand() + "\nTimes per Day: " + f.getTimesPerDay() + "\nQuantity: " + f.getQuantity() + "\nMore information: " + f.getExtraInfo();
+  	public String getFollowing(@PathParam("email") String email){
+  		String result = "<h4>Who I am following</h4><br>";
+  		User user = dao.getUserByEmail(email);
+  		List<Pet> pets = user.getPets();
+  		
+  		for(Pet p : pets) {
+  			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
+  					+ "  <div class=\"card-body\">\r\n"
+  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + p.getName() + "</h5>\r\n"	
+  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + dao.getPetNameWithId(p.getFollowingPetId()) + "\" class=\"btn btn-primary\">View pet my pet follows</a>\r\n "
+  					+ "  </div>\r\n"
+  					+ "</div>&nbsp;";
   		}
   		return result;
   	}
   	
+  	//get the pets for a user to view - find a user
   	@GET
-  	@Path("getHabitatInformation/{email}/{petName}")
+  	@Path("getPetsToView/{email}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getHabitatInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		String result = "Habitat Information\n";
-  		List<Habitat> habitats = pet.getHabitats();
-  		for(Habitat h : habitats) {
-  			result = result + "Type: " + h.getTypeRequired() + "\nSize: " + h.getSize() + "\nBedding: " + h.getBedding() + "\nTemperature: " + h.getTemperature() + "\nTimes Cleaned: " + h.getTimesCleaned() + "\nMore info: " + h.getMoreInfo();
+  	public String getPetsToView(@PathParam("email") String email){
+  		String result = "<h4>My Pets</h4><br>";
+  		List<Pet> pets = new ArrayList<Pet>();
+  		pets = dao.getPetsByEmail(email);
+  		int i = 0;
+  		for(Pet p : pets) {
+  			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
+  					+ "  <div class=\"card-body\">\r\n"
+  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + p.getName() + "</h5>\r\n"
+  					+ "    <p class=\"card-text\"><span class=\"badge rounded-pill bg-secondary\">" + p.getSpecies() + "</span>&nbsp;<span class=\"badge rounded-pill bg-secondary\">" + p.getBreed() + "</span></p>\r\n"
+  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewOtherPet.html?email=" + email + "&petName=" + p.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "			
+  					+ "  </div>\r\n"
+  					+ "</div>&nbsp;";
+  			i = i + 1;
   		}
   		return result;
   	}
   	
+  	 //get users in the system and display them
   	@GET
-  	@Path("getVetInformation/{email}/{petName}")
+  	@Path("getUsersWithSpecies/{email}/{species}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getVetInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		Pet pet = dao.getPetFromUser(email, petName);
-  		String result = "Vet information\n";
+  	public String getUsersWithSpecies(@PathParam("species") String species, @PathParam("email") String email){
+  		List<User> users = dao.getAllUsers();
+  		String result = " ";
+  		for(User u : users) {
+  			for(Badge b : u.getBadges()) {
+  				if(b.getName().equals("Expert")) {
+  					for(Pet p : u.getPets()) {
+  						if(p.getSpecies().equals(species) && !(u.getEmail().equals(email))) {
+	  						result += "<div class=\"card\" style=\"width: 18rem;\"><div class=\"card-body\"><h5 class=\"card-title\">" + u.getUsername() + "</h5><p class=\"card-text\">";
+	  		  	  			List<Badge> badges = u.getBadges();
+	  		  	  			for(Badge a : badges) {
+	  		  	  				result += "<span class=\"badge rounded-pill bg-primary\">" + a.getName() + "</span>&nbsp;<br>";
+	  		  	  			}
+	  		  	  			List<Pet> pets = u.getPets();
+	  			  			for(Pet e : pets) {
+	  			  				result += "<span class=\"badge rounded-pill bg-secondary\">" + e.getSpecies() + "</span>&nbsp;<br>";
+	  			  			}
+	  		  	  			result += "<br><a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\">View user profile</a></div></div>&nbsp;";
+	  					}
+	  				}
+	  			}
+  			}
+  		}
+  		return result;
+  	}
+  	
+  	//follow a pet
+  	@POST
+    @Path("followPet/{emailLoggedIn}/{emailViewUser}/{petName}")
+    @Produces(MediaType.TEXT_HTML)
+    public void followPet(@PathParam("emailLoggedIn") String emailLoggedIn,@PathParam("emailViewUser") String emailViewUser, @PathParam("petName") String petName, @FormParam("myPetList") String myPetList) throws URISyntaxException{
+    	Pet myPet = dao.getPetFromUser(emailLoggedIn, myPetList);
+    	Pet theirPet = dao.getPetFromUser(emailViewUser, petName);
+      	myPet.setFollowingPetId(theirPet.getId());
+      	List<Pet> followers = theirPet.getFollowersPets();
+      	followers.add(myPet);
+      	dao.mergeObject(theirPet);
+      	
+      	List<Task> tasks = dao.getUserByEmail(emailViewUser).getLiveTasks();
+      	for(Task t : tasks) {
+      		t.setPet(myPet);
+      		dao.getUserByEmail(emailViewUser).getLiveTasks().add(t);
+      		dao.mergeObject(dao.getUserByEmail(emailViewUser));
+      	}
+      	dao.mergeObject(myPet);  		
+    }	
+  	
+  	//delete a pet for the logged in user
+  	@DELETE
+  	@Path("removePet/{petId}/{email}")
+  	public void removePet(@PathParam("email") String email, @PathParam("petId") int petId){
+  	  	User user = dao.getUserByEmail(email);
+  	  	List<Pet> pets = user.getPets();
+  	  	for(Pet p : pets) {
+  	  		if(p.getId() == petId) {
+  	  			dao.remove(p);
+  	  		}
+  	  	}	
+  	}
+  	
+  	//update pet info if any of the fields have been completed
+  	@POST
+  	@Path("updatePetInfo/{useremail}/{petName}")
+  	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  	public void updatePetInfo(@PathParam("useremail") String useremail, @PathParam("petName") String petName, @FormParam("name") String name, @FormParam("gender") String gender, @FormParam("weight") String weight, @FormParam("species") String species, @FormParam("breed") String breed, @FormParam("colour") String colour, @FormParam("dob") String dob, @FormParam("petmoreinfo") String petmoreinfo, @FormParam("height") String height, @FormParam("foodtype") String foodtype, @FormParam("brand") String brand, @FormParam("timesPerDay") String timesPerDay, @FormParam("quantity") String quantity, @FormParam("foodmoreinfo") String foodmoreinfo, @FormParam("habitattype") String habitattype, @FormParam("size") String size, @FormParam("bedding") String bedding, @FormParam("temperature") String temperature, @FormParam("timesCleaned") String timesCleaned, @FormParam("habitatmoreinfo") String habitatmoreinfo, @FormParam("vetname") String vetname, @FormParam("address") String address, @FormParam("phoneNumber") String phoneNumber, @FormParam("vetemail") String vetemail, @FormParam("webUrl") String webUrl){
+  		Pet pet = dao.getPetFromUser(useremail, petName);
+  		Food food = pet.getFood();
+  		Habitat habitat = pet.getHabitat();
   		Vet vet = pet.getVet();
-  		result = result + "Name: " + vet.getName() + "\nAddress: " + vet.getAddress() + "\nPhone number: " + vet.getPhoneNumber() + "\nEmail : " + vet.getEmail() + "\nWeb URL: " + vet.getWebUrl();
-  		return result;
+  		
+  		if(!(gender.equals("") && weight.equals("") && species.equals("") && breed.equals("") && colour.equals("") && dob.equals(""))) {
+	  		if(!(gender.equals(""))) {
+	  			pet.setGender(gender);
+	  		}
+	  		if(!(weight.equals(""))) {
+	  			pet.setWeight(weight);
+	  		}
+	  		if(!(species.equals(""))) {
+	  			pet.setSpecies(species);
+	  		}
+	  		if(!(breed.equals(""))) {
+	  			pet.setBreed(breed);
+	  		}
+	  		if(!(colour.equals(""))) {
+	  			pet.setColour(colour);
+	  		}
+	  		if(!(dob.equals(""))) {
+	  			pet.setDob(dob);
+	  		}
+	  		if(!(petmoreinfo.equals(""))) {
+	  			pet.setMoreinfo(petmoreinfo);
+	  		}
+	  		if(!(height.equals(""))) {
+	  			pet.setHeight(height);
+	  		}
+	  		dao.mergeObject(pet);
+  		}
+  		
+		if(!(foodtype.equals("") && brand.equals("") && timesPerDay.equals("") && quantity.equals("") && foodmoreinfo.equals(""))) {
+			if(food == null) {
+				Food newFood = new Food();
+				if(!(foodtype.equals(""))) {
+					newFood.setType(foodtype);
+				}
+				if(!(brand.equals(""))) {
+					newFood.setBrand(brand);
+				}
+				if(!(timesPerDay.equals(""))) {
+					newFood.setTimesPerDay(timesPerDay);
+				}
+				if(!(quantity.equals(""))) {
+					newFood.setQuantity(quantity);
+				}
+				if(!(foodmoreinfo.equals(""))) {
+					newFood.setExtraInfo(foodmoreinfo);
+				}
+				dao.persistObject(newFood);
+				pet.setFood(newFood);
+				dao.mergeObject(pet);
+			}
+			else {
+				if(!(foodtype.equals(""))) {
+					food.setType(foodtype);
+				}
+				if(!(brand.equals(""))) {
+					food.setBrand(brand);
+				}
+				if(!(timesPerDay.equals(""))) {
+					food.setTimesPerDay(timesPerDay);
+				}
+				if(!(quantity.equals(""))) {
+					food.setQuantity(quantity);
+				}
+				if(!(foodmoreinfo.equals(""))) {
+					food.setExtraInfo(foodmoreinfo);
+				}
+				dao.mergeObject(food);
+			}
+		}
+		
+  		if(!(habitattype.equals("") && size.equals("") && bedding.equals("") && temperature.equals("") && timesCleaned.equals("") && habitatmoreinfo.equals(""))) {
+	  		if(habitat == null) {
+	  			Habitat newHabitat = new Habitat();
+	  			if(!(habitattype.equals(""))) {
+	  				newHabitat.setTypeRequired(habitattype);
+		  		}
+		  		if(!(size.equals(""))) {
+		  			newHabitat.setSize(size);
+		  		}
+		  		if(!(bedding.equals(""))) {
+		  			newHabitat.setBedding(bedding);
+		  		}
+		  		if(!(temperature.equals(""))) {
+		  			newHabitat.setTemperature(temperature);
+		  		}
+		  		if(!(timesCleaned.equals(""))) {
+		  			newHabitat.setTimesCleaned(timesCleaned);
+		  		}
+		  		if(!(habitatmoreinfo.equals(""))) {
+		  			newHabitat.setMoreInfo(habitatmoreinfo);
+		  		}
+		  		dao.persistObject(newHabitat);
+		  		pet.setHabitat(newHabitat);
+		  		dao.mergeObject(pet);
+	  		}
+	  		else {
+	  			if(!(habitattype.equals(""))) {
+		  			habitat.setTypeRequired(habitattype);
+		  		}
+		  		if(!(size.equals(""))) {
+		  			habitat.setSize(size);
+		  		}
+		  		if(!(bedding.equals(""))) {
+		  			habitat.setBedding(bedding);
+		  		}
+		  		if(!(temperature.equals(""))) {
+		  			habitat.setTemperature(temperature);
+		  		}
+		  		if(!(timesCleaned.equals(""))) {
+		  			habitat.setTimesCleaned(timesCleaned);
+		  		}
+		  		if(!(habitatmoreinfo.equals(""))) {
+		  			habitat.setMoreInfo(habitatmoreinfo);
+		  		}
+		  		dao.mergeObject(habitat);
+	  		}
+  		}
+  		
+  		if(!(vetname.equals("") && address.equals("") && phoneNumber.equals("") && vetemail.equals("") && webUrl.equals(""))) {
+  			if(vet == null) {
+  				Vet newVet = new Vet();
+  				if(!(vetname.equals(""))) {
+  					newVet.setName(vetname);
+		  		}
+		  		if(!(address.equals(""))) {
+		  			newVet.setAddress(address);
+		  		}
+		  		if(!(phoneNumber.equals(""))) {
+		  			newVet.setPhoneNumber(phoneNumber);
+		  		}
+		  		if(!(vetemail.equals(""))) {
+		  			newVet.setEmail(vetemail);
+		  		}
+		  		if(!(webUrl.equals(""))) {
+		  			newVet.setWebUrl(webUrl);
+		  		}
+		  		dao.persistObject(newVet);
+		  		pet.setVet(newVet);
+		  		dao.mergeObject(pet);
+  			}
+  			else {
+		  		if(!(vetname.equals(""))) {
+		  			vet.setName(vetname);
+		  		}
+		  		if(!(address.equals(""))) {
+		  			vet.setAddress(address);
+		  		}
+		  		if(!(phoneNumber.equals(""))) {
+		  			vet.setPhoneNumber(phoneNumber);
+		  		}
+		  		if(!(vetemail.equals(""))) {
+		  			vet.setEmail(vetemail);
+		  		}
+		  		if(!(webUrl.equals(""))) {
+		  			vet.setWebUrl(webUrl);
+		  		}
+		  		dao.mergeObject(vet);
+  			}
+  		}
   	}
   	
+  	//get user location
   	@GET
-  	@Path("getDocumentsInformation/{email}/{petName}")
+  	@Path("getPetName/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getDocumentsInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		//none yet
-  		return "not yet";
+  	public String getPetName(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getName();
   	}
   	
+  	//get user location
   	@GET
-  	@Path("getRecommendationsInformation/{email}/{petName}")
+  	@Path("getPetGender/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
-  	public String getRecommendationsInformation(@PathParam("email") String email, @PathParam("petName") String petName) {
-  		//none yet
-  		return "not yet";
+  	public String getPetGender(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getGender();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetWeight/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetWeight(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getWeight();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetSpecies/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetSpecies(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getSpecies();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetBreed/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetBreed(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getBreed();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetColour/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetColour(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getColour();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetDOB/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetDOB(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getDob();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetHeight/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetHeight(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getHeight();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getPetMoreInfo/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getPetMoreInfo(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		return pet.getMoreinfo();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getFoodType/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFoodType(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Food food = pet.getFood();
+  		return food.getType();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getFoodBrand/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFoodBrand(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Food food = pet.getFood();
+  		return food.getBrand();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getFoodTimesPerDay/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFoodTimesPerDay(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Food food = pet.getFood();
+  		return food.getTimesPerDay();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getFoodQuantity/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFoodQuantity(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Food food = pet.getFood();
+  		return food.getQuantity();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getFoodMoreInfo/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFoodMoreInfo(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Food food = pet.getFood();
+  		return food.getExtraInfo();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getHabitatType/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getHabitatType(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getTypeRequired();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getHabitatSize/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getHabitatSize(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getSize();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getHabitatBedding/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getHabitatBedding(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getBedding();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getHabitatTemperature/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getHabitatTemperature(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getTemperature();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getTimesCleaned/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getTimesCleaned(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getTimesCleaned();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getHabitatMoreInfo/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getHabitatMoreInfo(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Habitat habitat = pet.getHabitat();
+  		return habitat.getMoreInfo();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getVetName/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getVetName(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Vet vet = pet.getVet();
+  		return vet.getName();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getVetAddress/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getVetAddress(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Vet vet = pet.getVet();
+  		return vet.getAddress();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getVetPhoneNumber/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getVetPhoneNumber(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Vet vet = pet.getVet();
+  		return vet.getPhoneNumber();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getVetEmail/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getVetEmail(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Vet vet = pet.getVet();
+  		return vet.getEmail();
+  	}
+  	
+  	//get user location
+  	@GET
+  	@Path("getVetURL/{email}/{petName}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getVetURL(@PathParam("email") String email, @PathParam("petName") String petName){
+  		Pet pet = dao.getPetFromUser(email, petName);
+  		Vet vet = pet.getVet();
+  		return vet.getWebUrl();
   	}
 }

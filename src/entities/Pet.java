@@ -2,20 +2,14 @@ package entities;
  
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.CascadeType;
-//imports
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -29,20 +23,6 @@ public class Pet {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
-	//documents
-	@Lob
-	private byte[] microchipCertificate;
-	
-	@Lob
-	private byte[] profileImage;
-	
-	@Lob
-	private byte[] ownerLicence;
-	
-	@Lob
-	private byte[] healthCard;
-	
-	//variables
 	private String name;
 	private String gender;
 	private String weight;
@@ -55,24 +35,25 @@ public class Pet {
 	private int age;
 	
 	//a pet has one or more types of food
-	@OneToMany
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<Food> foods = new ArrayList<Food>();
+	@OneToOne
+	private Food food;
 	
 	//a pet has one or more habitats
-	@OneToMany
-	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<Habitat> habitats = new ArrayList<Habitat>();
+	@OneToOne
+	private Habitat habitat;
 	
 	//a pet has one vet
 	@OneToOne
 	Vet vet;
 	
-	//a pet has one or more recommendations
-	@OneToMany
+	//a pet has many followers
+	@ManyToMany
 	@LazyCollection(LazyCollectionOption.FALSE)
-	private List<Recommendation> recommendations = new ArrayList<Recommendation>();
-		
+	private List<Pet> followersPets = new ArrayList<Pet>();
+	
+	//a pet can follow another pet
+	int followingPetId;
+
 	public Pet() {
 		
 	}
@@ -177,21 +158,21 @@ public class Pet {
 	public void setAge(int age) {
 		this.age = age;
 	}
-
-	public List<Food> getFoods() {
-		return foods;
+	
+	public Food getFood() {
+		return food;
 	}
 
-	public void setFoods(List<Food> foods) {
-		this.foods = foods;
+	public void setFood(Food food) {
+		this.food = food;
 	}
 
-	public List<Habitat> getHabitats() {
-		return habitats;
+	public Habitat getHabitat() {
+		return habitat;
 	}
 
-	public void setHabitats(List<Habitat> habitats) {
-		this.habitats = habitats;
+	public void setHabitat(Habitat habitat) {
+		this.habitat = habitat;
 	}
 
 	public Vet getVet() {
@@ -202,45 +183,19 @@ public class Pet {
 		this.vet = vet;
 	}
 
-	public List<Recommendation> getRecommendations() {
-		return recommendations;
+	public List<Pet> getFollowersPets() {
+		return followersPets;
 	}
 
-	public void setRecommendations(List<Recommendation> recommendations) {
-		this.recommendations = recommendations;
+	public void setFollowersPets(List<Pet> followersPets) {
+		this.followersPets = followersPets;
 	}
 
-	public byte[] getMicrochipCertificate() {
-		return microchipCertificate;
+	public int getFollowingPetId() {
+		return followingPetId;
 	}
 
-	public void setMicrochipCertificate(byte[] microchipCertificate) {
-		this.microchipCertificate = microchipCertificate;
+	public void setFollowingPetId(int followingPetId) {
+		this.followingPetId = followingPetId;
 	}
-
-	public byte[] getProfileImage() {
-		return profileImage;
-	}
-
-	public void setProfileImage(byte[] profileImage) {
-		this.profileImage = profileImage;
-	}
-
-	public byte[] getHealthCard() {
-		return healthCard;
-	}
-
-	public void setHealthCard(byte[] healthCard) {
-		this.healthCard = healthCard;
-	}
-
-	public byte[] getOwnerLicence() {
-		return ownerLicence;
-	}
-
-	public void setOwnerLicence(byte[] ownerLicence) {
-		this.ownerLicence = ownerLicence;
-	}
-	
-	
 }

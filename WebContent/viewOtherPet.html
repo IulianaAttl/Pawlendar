@@ -83,19 +83,68 @@
 					</div>
 				</div>
 				<div class="col-sm-9">
-					<form id="editInfoForm" action="http://localhost:8080/Pawlendar/rest/updatePetInfo/" method="post">
 						<script>
-							var link = document.getElementById("editInfoForm");
-							var email = localStorage.getItem("emailLoggedin");
 							const urlString = window.location.search;
 							const urlParam = new URLSearchParams(urlString);
 							const petName = urlParam.get('petName');
-							link.action = "http://localhost:8080/Pawlendar/rest/updatePetInfo/" + email + "/" + petName;
+							const email = urlParam.get('email');
 						</script>
+						
+						<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#followPetModal">Follow this pet</button><br>
+								<div class="modal fade" id="followPetModal" tabindex="-1" aria-labelledby="followPetModal" aria-hidden="true">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<form id="followPetForm" action="http://localhost:8080/Pawlendar/rest/followPet/" method="post">
+												<script>
+													var link = document.getElementById("followPetForm");
+													var emailLoggedIn = localStorage.getItem("emailLoggedin");
+													const urlString = window.location.search;
+													const urlParam = new URLSearchParams(urlString);
+													const emailViewUser = urlParam.get('email');
+													const petName = urlParam.get('petName');
+													link.action = "http://localhost:8080/Pawlendar/rest/followPet/" + emailLoggedIn + "/" + emailViewUser + "/" + petName;
+												</script>
+												<div class="modal-header">
+													<h5 class="modal-title" id="foodModalLabel">Follow a pet</h5>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													<div class="mb-3">
+														<label for="myPetList" class="form-label">Please choose one of your pets you want to be as a follower</label>
+														<select id="resultPetsForMyList" type="text" class="form-control" name="myPetList" id="myPetList" placeholder="Pet" required>
+															<script>
+															//XMLHttpRequest object can be used to request data from a web server
+															//create the request
+															var xhttp = new XMLHttpRequest();
+															//function to be executed every time the status of the request object changes
+															xhttp.onreadystatechange = function(){
+																//when these conditions are met then the response is ready
+																if(this.readyState == 4 && this.status == 200){
+																//the response text returns the server response as a string
+																	document.getElementById("resultPetsForMyList").innerHTML = this.responseText;
+																}
+															};
+															var url = "http://localhost:8080/Pawlendar/rest/getPetsForMyList/" + localStorage.getItem("emailLoggedin");
+															xhttp.open("GET", url, true);
+															xhttp.send();
+															</script>
+														</select>
+	 												</div>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+													<input type="submit" class="btn btn-secondary">
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+						
+						<br>
 						
 						<h5 id="pet">Pet Information</h5>
 						<div class="mb-3">
-							What is your pets name? Current name:<h5 id="number1"></h5>
+							Name:<h5 id="number1"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -115,8 +164,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="gender" class="form-label">Is your pet male or female? Current gender: </label><h5 id="number2"></h5> 
-							<input type="text" class="form-control" name="gender" id="gender" placeholder="Gender">
+							Gender: <h5 id="number2"></h5> 
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -135,8 +183,8 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="weight" class="form-label">What is your pet's weight? Current weight: </label><h5 id="number3"></h5> 
-							<input type="text" class="form-control" name="weight" id="weight" placeholder="15kg, 3lb, ...">
+							Weight: <h5 id="number3"></h5> 
+					
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -155,8 +203,8 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="species" class="form-label">What species is your pet? Current species: </label><h5 id="number4"></h5> 
-							<input type="text" class="form-control" name="species" id="species" placeholder="Dog, Cat, Hamster, ...">
+							Species: <h5 id="number4"></h5> 
+					
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -175,8 +223,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="breed" class="form-label">Is your pet a specific breed of that species? Current breed: </label><h5 id="number5"></h5>
-							<input type="text" class="form-control" name="breed" id="breed" placeholder="Bulldog, Siamese, Dwarf, ...">
+							Breed: <h5 id="number5"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -195,8 +242,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="colour" class="form-label">What colour is your pet? Current colour: </label><h5 id="number6"></h5>
-							<input type="text" class="form-control" name="colour" id="colour" placeholder="Black and White, Brown, Grey, ...">
+							Current colour: <h5 id="number6"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -215,8 +261,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="dob" class="form-label">When was your pet born? Current date: </label><h5 id="number7"></h5> 
-							<input type="date" class="form-control" name="dob" id="dob" placeholder="Date of Birth">
+							Date of birth: <h5 id="number7"></h5> 
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -235,8 +280,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="height" class="form-label">What is your pet's height? (specify ft, cm, m or in, for example - 3in) Current height: </label><h5 id="number8"></h5>
-							<input type="text" class="form-control" name="height" id="height" placeholder="3in, 50cm, ...">
+							Height: <h5 id="number8"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -255,8 +299,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="petmoreinfo" class="form-label">More Information? Current more information: </label><h5 id="number9"></h5>
-							<textarea type="text" class="form-control" name="petmoreinfo" id="petmoreinfo" placeholder="More Information"></textarea>
+							More information: <h5 id="number9"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -277,8 +320,7 @@
 						
 						<h5 id="food">Food Information</h5>
 						<div class="mb-3">
-							<label for="foodtype" class="form-label">What type of food is it? Current type: </label><h5 id="number10"></h5>
-							<input type="text" class="form-control" name="foodtype" id="foodtype" placeholder="Dry, Wet, Homecooked, ...">
+							Type of food: <h5 id="number10"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -297,8 +339,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="brand" class="form-label">Is the food a certain brand? Current brand: </label><h5 id="number11"></h5>
-							<input type="text" class="form-control" name="brand" id="brand" placeholder="Pedigree, Whiskas, Burgess, ...">
+							Brand: </label><h5 id="number11"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -317,9 +358,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="timesPerDay" class="form-label">How often do you feed your pet this food? Current time often: </label><h5 id="number12"></h5>
-							<input type="text" class="form-control" name="timesPerDay" id="timesPerDay" placeholder="Twice per day, once a week, ...">
-						</div>
+							Time often: </label><h5 id="number12"></h5>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
 							//create the request
@@ -337,8 +376,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="quantity" class="form-label">How much food do you feed your pet at the specified time slot above? Current ammount: </label><h5 id="number13"></h5>
-							<input type="text" class="form-control" name="quantity" id="quantity" placeholder="200g, 3oz, 2 cups, ...">
+							Ammount: <h5 id="number13"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -357,8 +395,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="foodmoreinfo" class="form-label">More Information? Current more information: </label><h5 id="number14"></h5>
-							<textarea type="text" class="form-control" name="foodmoreinfo" id="foodmoreinfo" placeholder="More Information"></textarea>
+							More information: <h5 id="number14"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -379,8 +416,7 @@
 												
 						<h5 id="habitat">Habitat Information</h5>
 						<div class="mb-3">
-							<label for="habitattype" class="form-label">What type of habitat is it? Current type: </label><h5 id="number15"></h5>
-							<input type="text" class="form-control" name="habitattype" id="habitattype" placeholder="Forest, Freshwater, Desert, ...">
+							Type: <h5 id="number15"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -399,8 +435,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="size" class="form-label">What is the size of the habitat? Current size: </label><h5 id="number16"></h5>
-							<input type="text" class="form-control" name="size" id="size" placeholder="2 x 4m, ...">
+							Size: <h5 id="number16"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -419,8 +454,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="bedding" class="form-label">What type of bedding is required? (can be a list) Current bedding: </label><h5 id="number17"></h5>
-							<input type="text" class="form-control" name="bedding" id="bedding" placeholder="Hay, Sand, Freshwater, ...">
+							Bedding: <h5 id="number17"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -439,8 +473,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="temperature" class="form-label">Does your pet have a temperature requirement? Current temperature: </label><h5 id="number18"></h5>
-							<input type="text" class="form-control" name="temperature" id="temperature" placeholder="20 degrees celcius, ...">
+							Temperature: <h5 id="number18"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -459,8 +492,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="timesCleaned" class="form-label">Does the habitat require cleaning? If yes, how often? Current times: </label><h5 id="number19"></h5>
-							<input type="text" class="form-control" name="timesCleaned" id="timesCleaned" placeholder="Once a month, ...">
+							Times: <h5 id="number19"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -479,8 +511,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="habitatmoreinfo" class="form-label">More Information? Current more information: </label><h5 id="number20"></h5>
-							<textarea type="text" class="form-control" name="habitatmoreinfo" id="habitatmoreinfo" placeholder="More Information"></textarea>
+							More information: <h5 id="number20"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -501,8 +532,7 @@
 										
 						<h5 id="vet">Vet Information</h5>	
 						<div class="mb-3">
-							<label for="vetname" class="form-label">Vet Name? Current name: </label><h5 id="number21"></h5>
-							<input class="form-control" type="text" id="vetname" name="vetname" placeholder="Name">
+							Name: <h5 id="number21"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -521,8 +551,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="address" class="form-label">Vet Complete Address? Current address: </label><h5 id="number22"></h5>
-							<input class="form-control" type="text" id="address" name="address" placeholder="Address">	
+							Address: <h5 id="number22"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -541,8 +570,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="phoneNumber" class="form-label">Vet Phone Number? Current phone number: </label><h5 id="number23"></h5>
-							<input class="form-control" type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number">	
+							Phone number: <h5 id="number23"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -561,8 +589,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="vetemail" class="form-label">Vet Email? Current email: </label><h5 id="number24"></h5>
-							<input class="form-control" type="text" id="vetemail" name="vetemail" placeholder="Email">
+							Email: <h5 id="number24"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -581,8 +608,7 @@
 							xhttp.send();
 						</script>
 						<div class="mb-3">
-							<label for="webUrl" class="form-label">Vet Website URL? Current URL: </label><h5 id="number25"></h5>
-							<input class="form-control" type="text" id="webUrl" name="webUrl" placeholder="Website URL">	
+							URL: <h5 id="number25"></h5>
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server
@@ -600,8 +626,6 @@
 							xhttp.open("GET", url, true);
 							xhttp.send();
 						</script>
-						<input type="submit" class="btn btn-outline-secondary" value="Save" style="margin:auto">
-					</form>
 				</div>
 			</div>
 		</div>

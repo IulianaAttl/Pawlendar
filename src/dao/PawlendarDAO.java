@@ -9,8 +9,6 @@ import entities.Badge;
 import entities.Food;
 import entities.Habitat;
 import entities.Pet;
-import entities.Post;
-import entities.Recommendation;
 import entities.Task;
 import entities.User;
 import entities.Vet;
@@ -101,14 +99,6 @@ public class PawlendarDAO {
 		return habitats;
 	}
 	
-	//get a list of all recommendations
-	public List<Recommendation> getAllRecommendations(){
-		EntityManager em = emf.createEntityManager();
-		List<Recommendation> recommendations = (List<Recommendation>) em.createNamedQuery("Recommendation.findAll").getResultList();
-		em.close();
-		return recommendations;
-	}
-	
 	//get a list of all vets
 	public List<Vet> getAllvets(){
 		EntityManager em = emf.createEntityManager();
@@ -117,13 +107,6 @@ public class PawlendarDAO {
 		return vets;
 	}
 	
-	//get a list of all the posts
-	public List<Post> getAllPosts(){
-		EntityManager em = emf.createEntityManager();
-		List<Post> posts = (List<Post>) em.createNamedQuery("Post.findAll").getResultList();
-		em.close();
-		return posts;
-	}
 	
 	//get a list of all the tasks
 	public List<Task> getAllTasks(){
@@ -331,7 +314,7 @@ public class PawlendarDAO {
 				user = u;
 			}
 		}
-		return user.getTasks();
+		return user.getLiveTasks();
 	}
 
 	public boolean checkUsernameExists(String username) {
@@ -344,4 +327,16 @@ public class PawlendarDAO {
 		}
 		return found;
 	}
+
+	public String getPetNameWithId(int followingPetId) {
+		List<Pet> pets = getAllPets();
+		Pet pet = null;
+		for(Pet p : pets) {
+			if(p.getId() == followingPetId) {
+				pet = p;
+			}
+		}
+		return pet.getName();
+	}
+
 }
