@@ -156,7 +156,7 @@ public class PawlendarDAO {
 		return user;
 	}
 
-	//get the username by email
+	//get the username using email
 	public String getUsernameByEmail(String email) {
 		String username = null;
 		List<User> users = getAllUsers();
@@ -232,7 +232,7 @@ public class PawlendarDAO {
 	 * Methods for the pet entity
 	 **/
 
-	//get the pet id from the name
+	//get the pet id from the name of the pet
 	public String getPetID(String selectedPet) {
 		Pet pet = null;
 		List<Pet> pets = getAllPets();
@@ -265,6 +265,7 @@ public class PawlendarDAO {
 		return pet;
 	}
 
+	//get the badges using email
 	public List<Badge> getBadgesByEmail(String email) {
 		List<User> users = getAllUsers();
 		User user = null;
@@ -278,6 +279,7 @@ public class PawlendarDAO {
 		return user.getBadges();
 	}
 
+	//get a specific badge using id
 	public Badge getBadge(int i) {
 		List<Badge> badges = getAllBadges();
 		Badge badge = null;
@@ -290,6 +292,7 @@ public class PawlendarDAO {
 		return badge;
 	}
 
+	//check if the badges were created
 	public boolean createdBadges() {
 		List<Badge> existingBadges = getAllBadges();
 		boolean found = false;
@@ -306,6 +309,7 @@ public class PawlendarDAO {
 		}
 	}
 
+	//get tasks by email
 	public List<Task> getTasksByEmail(String email) {
 		List<User> users = getAllUsers();
 		User user = null;
@@ -317,6 +321,7 @@ public class PawlendarDAO {
 		return user.getLiveTasks();
 	}
 
+	//check if the username exists
 	public boolean checkUsernameExists(String username) {
 		boolean found = false;
 		List<User> users = getAllUsers();
@@ -328,6 +333,7 @@ public class PawlendarDAO {
 		return found;
 	}
 
+	//get the pet name using id
 	public String getPetNameWithId(int followingPetId) {
 		List<Pet> pets = getAllPets();
 		Pet pet = null;
@@ -337,6 +343,19 @@ public class PawlendarDAO {
 			}
 		}
 		return pet.getName();
+	}
+
+	public User getUserByPet(int followingId) {
+		List<User> users = getAllUsers();
+		User user = null;
+		for(User u : users) {
+			for(Pet p : u.getPets()) {
+				if(p.getId() == followingId) {
+					user = u;
+				}
+			}
+		}
+		return user;
 	}
 
 }

@@ -63,7 +63,7 @@
 							</a>
 							<ul class="dropdown-menu dropdown-menu-lg-dark" aria-labelledby="navbarDropdown">
 								<li><a class="dropdown-item" href="manageinfo.html">Manage Account</a></li>
-								<li><a class="dropdown-item">Logout</a></li>
+								<li><a class="dropdown-item" href="index.html">Logout</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -89,59 +89,7 @@
 							const petName = urlParam.get('petName');
 							const email = urlParam.get('email');
 						</script>
-						
-						<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#followPetModal">Follow this pet</button><br>
-								<div class="modal fade" id="followPetModal" tabindex="-1" aria-labelledby="followPetModal" aria-hidden="true">
-									<div class="modal-dialog">
-										<div class="modal-content">
-											<form id="followPetForm" action="http://localhost:8080/Pawlendar/rest/followPet/" method="post">
-												<script>
-													var link = document.getElementById("followPetForm");
-													var emailLoggedIn = localStorage.getItem("emailLoggedin");
-													const urlString = window.location.search;
-													const urlParam = new URLSearchParams(urlString);
-													const emailViewUser = urlParam.get('email');
-													const petName = urlParam.get('petName');
-													link.action = "http://localhost:8080/Pawlendar/rest/followPet/" + emailLoggedIn + "/" + emailViewUser + "/" + petName;
-												</script>
-												<div class="modal-header">
-													<h5 class="modal-title" id="foodModalLabel">Follow a pet</h5>
-													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-												</div>
-												<div class="modal-body">
-													<div class="mb-3">
-														<label for="myPetList" class="form-label">Please choose one of your pets you want to be as a follower</label>
-														<select id="resultPetsForMyList" type="text" class="form-control" name="myPetList" id="myPetList" placeholder="Pet" required>
-															<script>
-															//XMLHttpRequest object can be used to request data from a web server
-															//create the request
-															var xhttp = new XMLHttpRequest();
-															//function to be executed every time the status of the request object changes
-															xhttp.onreadystatechange = function(){
-																//when these conditions are met then the response is ready
-																if(this.readyState == 4 && this.status == 200){
-																//the response text returns the server response as a string
-																	document.getElementById("resultPetsForMyList").innerHTML = this.responseText;
-																}
-															};
-															var url = "http://localhost:8080/Pawlendar/rest/getPetsForMyList/" + localStorage.getItem("emailLoggedin");
-															xhttp.open("GET", url, true);
-															xhttp.send();
-															</script>
-														</select>
-	 												</div>
-												</div>
-												<div class="modal-footer">
-													<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-													<input type="submit" class="btn btn-secondary">
-												</div>
-											</form>
-										</div>
-									</div>
-								</div>
-						
 						<br>
-						
 						<h5 id="pet">Pet Information</h5>
 						<div class="mb-3">
 							Name:<h5 id="number1"></h5>
@@ -204,7 +152,6 @@
 						</script>
 						<div class="mb-3">
 							Species: <h5 id="number4"></h5> 
-					
 						</div>
 						<script>
 							//XMLHttpRequest object can be used to request data from a web server

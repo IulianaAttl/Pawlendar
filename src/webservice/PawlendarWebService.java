@@ -81,6 +81,11 @@ public class PawlendarWebService{
   		else {
   			User u = dao.getUserByEmail(email);
   			u.setTimesLoggedIn(u.getTimesLoggedIn() + 1);
+  			if(u.getTimesLoggedIn() == 30) {
+  				if(!(u.getBadges().contains(dao.getBadge(6)))) {
+  					u.getBadges().add(dao.getBadge(6));
+  				}
+  			}
   			dao.mergeObject(u);
   			URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/profile.html");
 			return Response.seeOther(targetURIForRedirection).build();
@@ -132,7 +137,7 @@ public class PawlendarWebService{
 	  				result += "<span class=\"badge rounded-pill bg-secondary\">" + p.getSpecies() + "</span>&nbsp;";
 	  			}
   	  			
-  	  			result += "<a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\" onClick=\"localStorage.setItem(\"emailOfUser\"," + u.getEmail() + ");\">View user profile</a></div></div>&nbsp;";
+  	  			result += "<br><br><a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\" onClick=\"localStorage.setItem(\"emailOfUser\"," + u.getEmail() + ");\">View user profile</a></div></div>&nbsp;";
   			}
   		}
   		return result;
@@ -214,6 +219,7 @@ public class PawlendarWebService{
   		Pet pet = dao.getPetFromUser(email, petList);
   	  	User user = dao.getUserByEmail(email);
   	  	List<Task> tasks = user.getLiveTasks();
+  	  	List<Task> toAdd = new ArrayList<Task>();
   	  	int dayChosen = day;
 		int monthChosen = month;
 		int yearChosen = year;
@@ -223,6 +229,7 @@ public class PawlendarWebService{
   	  				String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
   	  				Task task = new Task(title, date, time, content, pet, false);
   	  				dao.persistObject(task);
+  	  				toAdd.add(task);
   	  				tasks.add(task);
   	  				dayChosen = 1;
 	  				monthChosen = monthChosen + 1;
@@ -231,6 +238,7 @@ public class PawlendarWebService{
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 	  				Task task = new Task(title, date, time, content, pet, false);
 	  	  			dao.persistObject(task);
+	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
 	  	  			dayChosen = 1;
 	  				monthChosen = monthChosen + 1;
@@ -240,8 +248,9 @@ public class PawlendarWebService{
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 	  				Task task = new Task(title, date, time, content, pet, false);
 	  	  			dao.persistObject(task);
+	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
-	  	  		dayChosen = 1;
+	  	  			dayChosen = 1;
 	  				monthChosen = monthChosen + 1;
   	  			}
   	  			else if(dayChosen == 31 && monthChosen == 12) {
@@ -249,8 +258,9 @@ public class PawlendarWebService{
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 	  				Task task = new Task(title, date, time, content, pet, false);
 	  	  			dao.persistObject(task);
+	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
-	  	  		dayChosen = 1;
+	  	  			dayChosen = 1;
 	  				monthChosen = 1;
 	  				yearChosen = yearChosen + 1;
   	  			}
@@ -259,8 +269,9 @@ public class PawlendarWebService{
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 	  				Task task = new Task(title, date, time, content, pet, false);
 	  	  			dao.persistObject(task);
+	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
-	  	  		dayChosen = dayChosen + 1;
+	  	  			dayChosen = dayChosen + 1;
   	  			}
   	  		}
   	  	}
@@ -273,6 +284,7 @@ public class PawlendarWebService{
 	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 	  			Task task = new Task(title, date, time, content, pet, false);
 	  			dao.persistObject(task);
+	  			toAdd.add(task);
 	  			tasks.add(task);
 	  			monthChosen = monthChosen + 1;
 	  		}
@@ -283,6 +295,7 @@ public class PawlendarWebService{
 	  	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 				Task task = new Task(title, date, time, content, pet, false);
 	  			dao.persistObject(task);
+	  			toAdd.add(task);
 	  			tasks.add(task);
 	  			yearChosen = yearChosen + 1;
 	  		}
@@ -291,24 +304,37 @@ public class PawlendarWebService{
   	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
 			Task task = new Task(title, date, time, content, pet, false);
   	  		dao.persistObject(task);
+  	  		toAdd.add(task);
   	  		tasks.add(task);
   	  	}
-  	  	List<Task> taskForFollowers = new ArrayList<Task>();
-  	  	List<User> allUsers = dao.getAllUsers();
-  	  	for(Pet p : pet.getFollowersPets()) {
-  	  		for(User u : allUsers) {
-  	  			if(u.getPets().contains(p)) {
-  	  				for(Task t : tasks) {
-  	  					t.setPet(p);
-  	  					taskForFollowers.add(t);
-  	  				}
-  	  				u.setLiveTasks(taskForFollowers);
-  	  				dao.mergeObject(u);
-  	  			}
-  	  		}
-  	  	}
+  	  	
   	  	user.setLiveTasks(tasks);
-  	  	dao.mergeObject(user);  		
+  	  	dao.mergeObject(user);  
+  	  	
+  	  	List<Pet> followers = pet.getFollowersPets();
+      
+  	  	for(Pet p : followers) {
+	  	  	for(User u : dao.getAllUsers()) {
+	  	  		for(Pet pe : u.getPets()) {
+	  	  			if(pe == p) {
+	  	  			List<Task> userTasks = u.getLiveTasks();
+		  	  			for(Task t : toAdd) {
+		  		    		Task newTask = new Task();
+		  		    		newTask.setContent(t.getContent());
+		  		    		newTask.setCopied(true);
+		  		    		newTask.setDate(t.getDate());
+		  		    		newTask.setPet(pe);
+		  		    		newTask.setTime(t.getTime());
+		  		    		newTask.setTitle(t.getTitle());
+		  		    		dao.persistObject(newTask);
+		  		    		userTasks.add(newTask);
+		  		    		dao.mergeObject(u);
+		  		    	}
+	  	  			}
+	  	  		}
+	  	  	}
+  	  	}
+  	  		
   	  	URI targetURIForRedirection = new URI("http://localhost:8080/Pawlendar/profile.html");
   		return Response.seeOther(targetURIForRedirection).build();	
   	}
@@ -322,29 +348,14 @@ public class PawlendarWebService{
   	  	for(Task t : tasks) {
   	  		if(t.getId() == taskId) {
   	  			dao.remove(t);
+  	  			tasks.remove(t);
   	  		}
   	  	}		
-  	}
-  	
-  	//add tasks from the viewed user to the logged in user
-  	@GET
-  	@Path("addTaskFromUser/{taskId}/{email}/{emailLoggedIn}")
-  	@Produces(MediaType.TEXT_HTML)
-  	public void addTaskFromUser(@PathParam("email") String email, @PathParam("emailLoggedIn") String emailLoggedIn, @PathParam("taskId") int taskId){
-  	  	User viewUser = dao.getUserByEmail(email);
-  	  	User loggedUser = dao.getUserByEmail(emailLoggedIn);
-  	  	List<Task> viewUserTasks = viewUser.getLiveTasks();
-  	  	List<Task> loggedUserTasks = loggedUser.getLiveTasks();
-  	  	
-  	  	for(Task t : viewUserTasks) {
-  	  		if(t.getId() == taskId) {
-  	  			Task task = new Task(t.getTitle(), t.getDate(), t.getTime(), t.getContent(), t.getPet(), true);
-  	  			dao.persistObject(task);
-  	  			loggedUserTasks.add(task);
-  	  		}
-  	  	}
-  	  	loggedUser.setLiveTasks(loggedUserTasks);
-  	  	dao.mergeObject(loggedUser);  		
+  	  	if(!(user.getBadges().contains(dao.getBadge(3)))) {
+			user.getBadges().add(dao.getBadge(3));
+		}
+  	  	user.setLiveTasks(tasks);
+  	  	dao.mergeObject(user);
   	}
   	
   	//get tasks for the logged in user
@@ -353,8 +364,7 @@ public class PawlendarWebService{
   	@Produces(MediaType.TEXT_HTML)
   	public String getTasks(@PathParam("email") String email){
   		String result = " ";
-  		List<Task> tasks = new ArrayList<Task>();
-  		tasks = dao.getTasksByEmail(email);
+  		List<Task> tasks = dao.getTasksByEmail(email);
   		Collections.sort(tasks, new sortTasks());
   		for(Task t : tasks) {
   			Pet pet = t.getPet();
@@ -427,6 +437,10 @@ public class PawlendarWebService{
 	  	  		pet.setVet(vet);
 		  	}
 		  	
+		  	if(!(user.getBadges().contains(dao.getBadge(2)))) {
+				user.getBadges().add(dao.getBadge(2));
+			}
+		  	
 		  	dao.persistObject(pet);
 		  	pets.add(pet);
 		  	user.setPets(pets);
@@ -450,7 +464,6 @@ public class PawlendarWebService{
   		String result = "<h4>My Pets</h4><br>";
   		List<Pet> pets = new ArrayList<Pet>();
   		pets = dao.getPetsByEmail(email);
-  		int i = 0;
   		for(Pet p : pets) {
   			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
   					+ "  <div class=\"card-body\">\r\n"
@@ -461,11 +474,12 @@ public class PawlendarWebService{
   					+ "	   <a href=\"http://localhost:8080/Pawlendar/findusers.html?findExpertSpecies=" + p.getSpecies() +"\" class=\"btn btn-secondary\">Find an expert</a>\r\n"					
   					+ "  </div>\r\n"
   					+ "</div>&nbsp;";
-  			i = i + 1;
+  			
   		}
   		return result;
   	}
   	
+  	//get the followers for a pet
   	@GET
   	@Path("getFollowers/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -474,25 +488,33 @@ public class PawlendarWebService{
   		User user = dao.getUserByEmail(email);
   		List<Pet> pets = user.getPets();
   		List<Pet> followers = new ArrayList<Pet>();
-  		
+  		int number = 0;
   		for(Pet p : pets) {
   			for(Pet u : p.getFollowersPets()) {
   				followers.add(u);
+  				number = number + 1;
   			}
   		}
   		
-  		int i = 0;
+  		if(number >= 10) {
+  			if(!(user.getBadges().contains(dao.getBadge(5)))) {
+					user.getBadges().add(dao.getBadge(5));
+			}
+  		}
+  		
   		for(Pet u : followers) {
   			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
   					+ "  <div class=\"card-body\">\r\n"
   					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + u.getName()+ "</h5>\r\n"	
-  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + u.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "
+  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewOtherPet.html?email=" + dao.getUserByPet(u.getId()).getEmail() + "&petName=" + u.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "
   					+ "  </div>\r\n"
   					+ "</div>&nbsp;";
-  			i = i + 1;
   		}
+  		
   		return result;
   	}
+  	
+  	//get the pet they are following
   	@GET
   	@Path("getFollowing/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -502,12 +524,43 @@ public class PawlendarWebService{
   		List<Pet> pets = user.getPets();
   		
   		for(Pet p : pets) {
-  			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
-  					+ "  <div class=\"card-body\">\r\n"
-  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + p.getName() + "</h5>\r\n"	
-  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewPet.html?petName=" + dao.getPetNameWithId(p.getFollowingPetId()) + "\" class=\"btn btn-primary\">View pet my pet follows</a>\r\n "
-  					+ "  </div>\r\n"
-  					+ "</div>&nbsp;";
+  			int followingId = p.getFollowingPetId();
+  			for(Pet pe : dao.getAllPets()) {
+  				if(pe.getId() == followingId) {
+  	  				result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
+  	  	  					+ "  <div class=\"card-body\">\r\n"
+  	  	  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + pe.getName() + "</h5>\r\n"	
+  	  	  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewOtherPet.html?email=" + dao.getUserByPet(followingId).getEmail() + "&petName=" + pe.getName() + "\" class=\"btn btn-primary\">View pet my pet follows</a>\r\n "
+  	  	  					+ "    <button onClick=\"unfollowPet(" + pe.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Unfollow pet</button>"
+  	  	  					+ "  </div>\r\n"
+  	  	  					+ "</div>&nbsp;";
+  	  			}
+  			}
+  		}
+  		return result;
+  	}
+  	
+  //get the pet they are following
+  	@GET
+  	@Path("getFollowingView/{email}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getFollowingView(@PathParam("email") String email){
+  		String result = "<h4>Who I am following</h4><br>";
+  		User user = dao.getUserByEmail(email);
+  		List<Pet> pets = user.getPets();
+  		
+  		for(Pet p : pets) {
+  			int followingId = p.getFollowingPetId();
+  			for(Pet pe : dao.getAllPets()) {
+  				if(pe.getId() == followingId) {
+  	  				result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
+  	  	  					+ "  <div class=\"card-body\">\r\n"
+  	  	  					+ "    <h5 id=\"cardTitle\" class=\"card-title\">" + pe.getName() + "</h5>\r\n"	
+  	  	  					+ "    <a href=\"http://localhost:8080/Pawlendar/viewOtherPet.html?email=" + dao.getUserByPet(followingId).getEmail() + "&petName=" + pe.getName() + "\" class=\"btn btn-primary\">View pet my pet follows</a>\r\n "
+  	  	  					+ "  </div>\r\n"
+  	  	  					+ "</div>&nbsp;";
+  	  			}
+  			}
   		}
   		return result;
   	}
@@ -520,7 +573,6 @@ public class PawlendarWebService{
   		String result = "<h4>My Pets</h4><br>";
   		List<Pet> pets = new ArrayList<Pet>();
   		pets = dao.getPetsByEmail(email);
-  		int i = 0;
   		for(Pet p : pets) {
   			result += "<div class=\"card\" style=\"width: 23rem;\">\r\n"
   					+ "  <div class=\"card-body\">\r\n"
@@ -529,12 +581,11 @@ public class PawlendarWebService{
   					+ "    <a href=\"http://localhost:8080/Pawlendar/viewOtherPet.html?email=" + email + "&petName=" + p.getName() + "\" class=\"btn btn-primary\">View pet</a>\r\n "			
   					+ "  </div>\r\n"
   					+ "</div>&nbsp;";
-  			i = i + 1;
   		}
   		return result;
   	}
   	
-  	 //get users in the system and display them
+  	//get users in the system that are experts and have the same species and display them
   	@GET
   	@Path("getUsersWithSpecies/{email}/{species}")
   	@Produces(MediaType.TEXT_HTML)
@@ -549,13 +600,13 @@ public class PawlendarWebService{
 	  						result += "<div class=\"card\" style=\"width: 18rem;\"><div class=\"card-body\"><h5 class=\"card-title\">" + u.getUsername() + "</h5><p class=\"card-text\">";
 	  		  	  			List<Badge> badges = u.getBadges();
 	  		  	  			for(Badge a : badges) {
-	  		  	  				result += "<span class=\"badge rounded-pill bg-primary\">" + a.getName() + "</span>&nbsp;<br>";
+	  		  	  				result += "<span class=\"badge rounded-pill bg-primary\">" + a.getName() + "</span>&nbsp;";
 	  		  	  			}
 	  		  	  			List<Pet> pets = u.getPets();
 	  			  			for(Pet e : pets) {
-	  			  				result += "<span class=\"badge rounded-pill bg-secondary\">" + e.getSpecies() + "</span>&nbsp;<br>";
+	  			  				result += "<span class=\"badge rounded-pill bg-secondary\">" + e.getSpecies() + "</span>&nbsp;";
 	  			  			}
-	  		  	  			result += "<br><a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\">View user profile</a></div></div>&nbsp;";
+	  		  	  			result += "<br><br><a href=\"http://localhost:8080/Pawlendar/viewUser.html?email=" + u.getEmail() + "\" class=\"btn btn-primary\">View user profile</a></div></div>&nbsp;";
 	  					}
 	  				}
 	  			}
@@ -566,23 +617,44 @@ public class PawlendarWebService{
   	
   	//follow a pet
   	@POST
-    @Path("followPet/{emailLoggedIn}/{emailViewUser}/{petName}")
+    @Path("followPet/{emailLoggedIn}/{emailViewUser}")
     @Produces(MediaType.TEXT_HTML)
-    public void followPet(@PathParam("emailLoggedIn") String emailLoggedIn,@PathParam("emailViewUser") String emailViewUser, @PathParam("petName") String petName, @FormParam("myPetList") String myPetList) throws URISyntaxException{
+    public void followPet(@PathParam("emailLoggedIn") String emailLoggedIn,@PathParam("emailViewUser") String emailViewUser, @FormParam("theirPetList") String theirPetList, @FormParam("myPetList") String myPetList) throws URISyntaxException{
     	Pet myPet = dao.getPetFromUser(emailLoggedIn, myPetList);
-    	Pet theirPet = dao.getPetFromUser(emailViewUser, petName);
-      	myPet.setFollowingPetId(theirPet.getId());
-      	List<Pet> followers = theirPet.getFollowersPets();
-      	followers.add(myPet);
-      	dao.mergeObject(theirPet);
-      	
-      	List<Task> tasks = dao.getUserByEmail(emailViewUser).getLiveTasks();
-      	for(Task t : tasks) {
-      		t.setPet(myPet);
-      		dao.getUserByEmail(emailViewUser).getLiveTasks().add(t);
-      		dao.mergeObject(dao.getUserByEmail(emailViewUser));
-      	}
-      	dao.mergeObject(myPet);  		
+    	Pet theirPet = dao.getPetFromUser(emailViewUser, theirPetList);
+      
+      	if(myPet.getFollowingPetId() != theirPet.getId()) {
+      		myPet.setFollowingPetId(theirPet.getId());
+          	dao.mergeObject(myPet);
+          	List<Pet> followers = theirPet.getFollowersPets();
+      		followers.add(myPet);
+          	theirPet.setFollowersPets(followers);
+          	dao.mergeObject(theirPet);
+          	List<Task> myTasks = dao.getUserByEmail(emailLoggedIn).getLiveTasks();
+      		List<Task> theirTasks = dao.getUserByEmail(emailViewUser).getLiveTasks();
+      		
+      		for(Task t : myTasks) {
+      			if(t.isCopied()) {
+      				myTasks.remove(t);
+      				dao.remove(t);
+      			}
+      		}
+      		
+      		for(Task t : theirTasks) {
+      			Task newTask = new Task();
+      			newTask.setContent(t.getContent());
+      			newTask.setCopied(true);
+      			newTask.setDate(t.getDate());
+      			newTask.setPet(myPet);
+      			newTask.setTime(t.getTime());
+      			newTask.setTitle(t.getTitle());
+      			dao.persistObject(newTask);
+      			myTasks.add(newTask);
+      		}
+      		User me = dao.getUserByEmail(emailLoggedIn);
+      		me.setLiveTasks(myTasks);
+  			dao.mergeObject(me);
+      	}	
     }	
   	
   	//delete a pet for the logged in user
@@ -598,11 +670,26 @@ public class PawlendarWebService{
   	  	}	
   	}
   	
+  	//delete a pet for the logged in user
+  	@DELETE
+  	@Path("unfollowPet/{petId}/{email}")
+  	public void unfollowPet(@PathParam("email") String email, @PathParam("petId") int petId){
+  	  	User user = dao.getUserByEmail(email);
+  	  	List<Pet> pets = user.getPets();
+  	  	for(Pet p : pets) {
+  	  		if(p.getFollowingPetId() == petId) {
+  	  			p.setFollowingPetId(0);
+  	  			dao.mergeObject(p);
+  	  		}
+  	  	}	
+  	}
+  	
   	//update pet info if any of the fields have been completed
   	@POST
   	@Path("updatePetInfo/{useremail}/{petName}")
   	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   	public void updatePetInfo(@PathParam("useremail") String useremail, @PathParam("petName") String petName, @FormParam("name") String name, @FormParam("gender") String gender, @FormParam("weight") String weight, @FormParam("species") String species, @FormParam("breed") String breed, @FormParam("colour") String colour, @FormParam("dob") String dob, @FormParam("petmoreinfo") String petmoreinfo, @FormParam("height") String height, @FormParam("foodtype") String foodtype, @FormParam("brand") String brand, @FormParam("timesPerDay") String timesPerDay, @FormParam("quantity") String quantity, @FormParam("foodmoreinfo") String foodmoreinfo, @FormParam("habitattype") String habitattype, @FormParam("size") String size, @FormParam("bedding") String bedding, @FormParam("temperature") String temperature, @FormParam("timesCleaned") String timesCleaned, @FormParam("habitatmoreinfo") String habitatmoreinfo, @FormParam("vetname") String vetname, @FormParam("address") String address, @FormParam("phoneNumber") String phoneNumber, @FormParam("vetemail") String vetemail, @FormParam("webUrl") String webUrl){
+  		User u = dao.getUserByEmail(useremail);
   		Pet pet = dao.getPetFromUser(useremail, petName);
   		Food food = pet.getFood();
   		Habitat habitat = pet.getHabitat();
@@ -765,11 +852,17 @@ public class PawlendarWebService{
 		  			vet.setWebUrl(webUrl);
 		  		}
 		  		dao.mergeObject(vet);
+		  		if(!(u.getBadges().contains(dao.getBadge(4)))) {
+  					u.getBadges().add(dao.getBadge(4));
+  				}
   			}
   		}
+  		if(!(u.getBadges().contains(dao.getBadge(4)))) {
+			u.getBadges().add(dao.getBadge(4));
+		}
   	}
   	
-  	//get user location
+  	//get pet name
   	@GET
   	@Path("getPetName/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -778,7 +871,7 @@ public class PawlendarWebService{
   		return pet.getName();
   	}
   	
-  	//get user location
+  	//get pet gender
   	@GET
   	@Path("getPetGender/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -787,7 +880,7 @@ public class PawlendarWebService{
   		return pet.getGender();
   	}
   	
-  	//get user location
+  	//get pet weight
   	@GET
   	@Path("getPetWeight/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -796,7 +889,7 @@ public class PawlendarWebService{
   		return pet.getWeight();
   	}
   	
-  	//get user location
+  	//get pet species
   	@GET
   	@Path("getPetSpecies/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -805,7 +898,7 @@ public class PawlendarWebService{
   		return pet.getSpecies();
   	}
   	
-  	//get user location
+  	//get pet breed
   	@GET
   	@Path("getPetBreed/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -814,7 +907,7 @@ public class PawlendarWebService{
   		return pet.getBreed();
   	}
   	
-  	//get user location
+  	//get pet colour
   	@GET
   	@Path("getPetColour/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -823,7 +916,7 @@ public class PawlendarWebService{
   		return pet.getColour();
   	}
   	
-  	//get user location
+  	//get pet dob
   	@GET
   	@Path("getPetDOB/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -832,7 +925,7 @@ public class PawlendarWebService{
   		return pet.getDob();
   	}
   	
-  	//get user location
+  	//get pet height
   	@GET
   	@Path("getPetHeight/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -841,7 +934,7 @@ public class PawlendarWebService{
   		return pet.getHeight();
   	}
   	
-  	//get user location
+  	//get pet more info
   	@GET
   	@Path("getPetMoreInfo/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -850,7 +943,7 @@ public class PawlendarWebService{
   		return pet.getMoreinfo();
   	}
   	
-  	//get user location
+  	//get food type
   	@GET
   	@Path("getFoodType/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -860,7 +953,7 @@ public class PawlendarWebService{
   		return food.getType();
   	}
   	
-  	//get user location
+  	//get food brand
   	@GET
   	@Path("getFoodBrand/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -870,7 +963,7 @@ public class PawlendarWebService{
   		return food.getBrand();
   	}
   	
-  	//get user location
+  	//get food times per day
   	@GET
   	@Path("getFoodTimesPerDay/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -880,7 +973,7 @@ public class PawlendarWebService{
   		return food.getTimesPerDay();
   	}
   	
-  	//get user location
+  	//get food quantity
   	@GET
   	@Path("getFoodQuantity/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -890,7 +983,7 @@ public class PawlendarWebService{
   		return food.getQuantity();
   	}
   	
-  	//get user location
+  	//get more information about food
   	@GET
   	@Path("getFoodMoreInfo/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -900,7 +993,7 @@ public class PawlendarWebService{
   		return food.getExtraInfo();
   	}
   	
-  	//get user location
+  	//get habitat type
   	@GET
   	@Path("getHabitatType/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -910,7 +1003,7 @@ public class PawlendarWebService{
   		return habitat.getTypeRequired();
   	}
   	
-  	//get user location
+  	//get habitat size
   	@GET
   	@Path("getHabitatSize/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -920,7 +1013,7 @@ public class PawlendarWebService{
   		return habitat.getSize();
   	}
   	
-  	//get user location
+  	//get habitat bedding
   	@GET
   	@Path("getHabitatBedding/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -930,7 +1023,7 @@ public class PawlendarWebService{
   		return habitat.getBedding();
   	}
   	
-  	//get user location
+  	//get habitat temperature
   	@GET
   	@Path("getHabitatTemperature/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -940,7 +1033,7 @@ public class PawlendarWebService{
   		return habitat.getTemperature();
   	}
   	
-  	//get user location
+  	//get times cleaned
   	@GET
   	@Path("getTimesCleaned/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -950,7 +1043,7 @@ public class PawlendarWebService{
   		return habitat.getTimesCleaned();
   	}
   	
-  	//get user location
+  	//get more information about habitat
   	@GET
   	@Path("getHabitatMoreInfo/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -960,7 +1053,7 @@ public class PawlendarWebService{
   		return habitat.getMoreInfo();
   	}
   	
-  	//get user location
+  	//get vet name
   	@GET
   	@Path("getVetName/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -970,7 +1063,7 @@ public class PawlendarWebService{
   		return vet.getName();
   	}
   	
-  	//get user location
+  	//get vet address
   	@GET
   	@Path("getVetAddress/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -980,7 +1073,7 @@ public class PawlendarWebService{
   		return vet.getAddress();
   	}
   	
-  	//get user location
+  	//get vet phone number
   	@GET
   	@Path("getVetPhoneNumber/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -990,7 +1083,7 @@ public class PawlendarWebService{
   		return vet.getPhoneNumber();
   	}
   	
-  	//get user location
+  	//get vet email
   	@GET
   	@Path("getVetEmail/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)
@@ -1000,7 +1093,7 @@ public class PawlendarWebService{
   		return vet.getEmail();
   	}
   	
-  	//get user location
+  	//get vet url
   	@GET
   	@Path("getVetURL/{email}/{petName}")
   	@Produces(MediaType.TEXT_HTML)

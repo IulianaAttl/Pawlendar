@@ -1,9 +1,9 @@
 package webservice;
 
 import java.util.Comparator;
-
 import entities.Task;
 
+//class to compare the dates and sort them
 public class sortTasks implements Comparator<Task> {
 
 	@Override

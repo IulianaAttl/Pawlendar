@@ -12,7 +12,7 @@
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 		
 		<script src="https://kit.fontawesome.com/b56caf5f15.js" crossorigin="anonymous"></script>
-		<title>Welcome</title>
+		<title>View User</title>
 		<style>
 		.display-6{
 			font-size: 2.0rem;
@@ -62,7 +62,7 @@
 							</a>
 							<ul class="dropdown-menu dropdown-menu-lg-dark" aria-labelledby="navbarDropdown">
 								<li><a class="dropdown-item" href="manageinfo.html">Manage Account</a></li>
-								<li><a class="dropdown-item">Logout</a></li>
+								<li><a class="dropdown-item" href="index.html">Logout</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -70,22 +70,6 @@
 			</div>
 		</nav>
 		<h1 id="welcomeProfile" class="display-6" align="center">My Profile</h1>
-		<div id="alertPlaceholder"></div>
-		<script>
-			function checkURL(){
-				const urlString = window.location.search;
-				const urlParam = new URLSearchParams(urlString);
-				const error = urlParam.get('error');
-				
-				var alertPlaceholder = document.getElementById('alertPlaceholder');
-				if(error === 'false'){
-					var wrapper = document.createElement('div');
-					wrapper.innerHTML = '<div class="alert alert-success alert-dismissible" role="alert">Pet followed successfully<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
-					alertPlaceholder.append(wrapper);
-				}
-			}
-		</script>
-		
 		<div class="container overflow-hidden">
 			<div class="row">
 				<div class="col-md-auto">
@@ -99,7 +83,6 @@
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-quote-fill" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793V2zm7.194 2.766a1.688 1.688 0 0 0-.227-.272 1.467 1.467 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 5.734 4C4.776 4 4 4.746 4 5.667c0 .92.776 1.666 1.734 1.666.343 0 .662-.095.931-.26-.137.389-.39.804-.81 1.22a.405.405 0 0 0 .011.59c.173.16.447.155.614-.01 1.334-1.329 1.37-2.758.941-3.706a2.461 2.461 0 0 0-.227-.4zM11 7.073c-.136.389-.39.804-.81 1.22a.405.405 0 0 0 .012.59c.172.16.446.155.613-.01 1.334-1.329 1.37-2.758.942-3.706a2.466 2.466 0 0 0-.228-.4 1.686 1.686 0 0 0-.227-.273 1.466 1.466 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 10.07 4c-.957 0-1.734.746-1.734 1.667 0 .92.777 1.666 1.734 1.666.343 0 .662-.095.931-.26z"/></svg>
 					<label for="bio"> Bio: </label>
 					<div class="overflow-auto"><p id="result3"></p></div>
-					
 					<script>
 						const urlString = window.location.search;
 						const urlParam = new URLSearchParams(urlString);
@@ -182,7 +165,6 @@
 				<div class="col">
 					<ul class="nav nav-tabs" id="myMenu" role="tablist">
 						<li class="nav-item" role="presentation">
-						<li class="nav-item" role="presentation">
 							<button class="nav-link" id="pets-tab" data-bs-toggle="tab" data-bs-target="#pets" type="button" role="tab" aria-controls="pets" aria-selected="false">Pets</button>
 						</li>
 						<li class="nav-item" role="presentation">
@@ -197,11 +179,77 @@
 					</ul>
 					<div class="tab-content" id="myMenuContent">
 						<div class="tab-pane fade" id="pets" role="tabpanel" aria-labelledby="pets-tab">
+							<br>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#followModal">Follow a pet</button>
+							<div class="modal fade" id="followModal" tabindex="-1" aria-labelledby="followModal" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<form id="followPetForm" action="http://localhost:8080/Pawlendar/rest/followPet/" method="post">
+											<script>
+												var link = document.getElementById("followPetForm");
+												link.action = "http://localhost:8080/Pawlendar/rest/followPet/" + localStorage.getItem("emailLoggedin") + "/" + email;
+											</script>
+											<div class="modal-header">
+												<h5 class="modal-title" id="foodModalLabel">Follow a Pet</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body">
+												<div class="mb-3">
+													<label for="myPetList" class="form-label">My Pet</label>
+													<select id="resultMyPets" type="text" class="form-select" name="myPetList" id="myPetList" placeholder="My Pet" required>
+														<script>
+															//XMLHttpRequest object can be used to request data from a web server
+															//create the request
+															var xhttp = new XMLHttpRequest();
+															//function to be executed every time the status of the request object changes
+															xhttp.onreadystatechange = function(){
+																//when these conditions are met then the response is ready
+																if(this.readyState == 4 && this.status == 200){
+																	//the response text returns the server response as a string
+																	document.getElementById("resultMyPets").innerHTML = this.responseText;
+																}
+															};
+															var url = "http://localhost:8080/Pawlendar/rest/getPetsForMyList/" + localStorage.getItem("emailLoggedin");
+															xhttp.open("GET", url, true);
+															xhttp.send();
+														</script>
+													</select>
+												</div>
+												<div class="mb-3">
+													<label for="theirPetList" class="form-label">Their Pet</label>
+													<select id="resultTheirPets" type="text" class="form-control" name="theirPetList" id="theirPetList" placeholder="Their Pet" required>
+														<script>
+															//XMLHttpRequest object can be used to request data from a web server
+															//create the request
+															var xhttp = new XMLHttpRequest();
+															//function to be executed every time the status of the request object changes
+															xhttp.onreadystatechange = function(){
+																//when these conditions are met then the response is ready
+																if(this.readyState == 4 && this.status == 200){
+																//the response text returns the server response as a string
+																	document.getElementById("resultTheirPets").innerHTML = this.responseText;
+																}
+															};
+															var url = "http://localhost:8080/Pawlendar/rest/getPetsForMyList/" + email;
+															xhttp.open("GET", url, true);
+															xhttp.send();
+														</script>
+													</select>
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+												<input type="submit" class="btn btn-secondary" data-bs-dismiss="modal">
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>	
+							<br>	
 							<div class="row">
 								<div class="col">
-								<br>
-								
-								<br>
+									<br>
+									<br>
 									<p id="resultPets"></p>
 									<script>
 										//XMLHttpRequest object can be used to request data from a web server
@@ -223,9 +271,8 @@
 							</div>
 						</div>
 						<div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
-						<br>
-						<br>
-						<h4>My Tasks</h4>
+							<br>
+							<h4>My Tasks</h4>
 							<table class="col-12">
 								<thead>
 									<tr>
@@ -234,7 +281,6 @@
 										<th scope="col">Due Time</th>
 										<th scope="col">Pet</th>
 										<th scope="col">Content</th>
-										<th scope="col">Action</th>
 									</tr>
 								</thead>
 								<tbody id="resultTasks">
@@ -256,8 +302,7 @@
 									</script>
 								</tbody>
 							</table>
-							
-							
+						</div>	
 						<div class="tab-pane fade" id="followers" role="tabpanel" aria-labelledby="followers-tab">
 							<p id = "resultFollowers">
 							<script>
@@ -278,10 +323,10 @@
 							</script>
 						</div>
 						<div class="tab-pane fade" id="following" role="tabpanel" aria-labelledby="following-tab">
-						<p id = "resultFollowing">
-						<script>
-							//XMLHttpRequest object can be used to request data from a web server
-							//create the request
+							<p id = "resultFollowing">
+							<script>
+								//XMLHttpRequest object can be used to request data from a web server
+								//create the request
 								var xhttp = new XMLHttpRequest();
 								//function to be executed every time the status of the request object changes
 								xhttp.onreadystatechange = function(){
@@ -291,7 +336,7 @@
 										document.getElementById("resultFollowing").innerHTML = this.responseText;
 									}
 								};
-								var url = "http://localhost:8080/Pawlendar/rest/getFollowing/" +email;
+								var url = "http://localhost:8080/Pawlendar/rest/getFollowingView/" +email;
 								xhttp.open("GET", url, true);
 								xhttp.send();
 							</script>
@@ -300,7 +345,6 @@
 				</div>
 			</div>
 		</div>
-		
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 	</body>
 </html>
