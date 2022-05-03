@@ -23,6 +23,7 @@ public class Task {
 	private String time;
 	private String content;
 	private boolean copied;
+	private boolean archived;
 	
 	//task references a pet
 	@OneToOne
@@ -32,13 +33,14 @@ public class Task {
 		
 	}
 
-	public Task(String title, String date, String time, String content, Pet pet, boolean copied) {
+	public Task(String title, String date, String time, String content, Pet pet, boolean copied, boolean archived) {
 		this.title = title;
 		this.date = date;
 		this.time = time;
 		this.content = content;
 		this.pet = pet;
 		this.copied = copied;
+		this.archived = archived;
 	}
 
 	public int getId() {
@@ -95,5 +97,13 @@ public class Task {
 
 	public void setCopied(boolean copied) {
 		this.copied = copied;
+	}
+
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
 	}
 }

@@ -247,15 +247,15 @@
 												<div class="mb-3">
 													<select type="text" class="form-select" name="day" id="day" placeholder="Location"required>
 														<option selected disabled value ="">Day ... </option>
-														<option value="1">1</option>
-														<option value="2">2</option>
-														<option value="3">3</option>
-														<option value="4">4</option>
-														<option value="5">5</option>
-														<option value="6">6</option>
-														<option value="7">7</option>
-														<option value="8">8</option>
-														<option value="9">9</option>
+														<option value="01">1</option>
+														<option value="02">2</option>
+														<option value="03">3</option>
+														<option value="04">4</option>
+														<option value="05">5</option>
+														<option value="06">6</option>
+														<option value="07">7</option>
+														<option value="08">8</option>
+														<option value="09">9</option>
 														<option value="10">10</option>
 														<option value="11">11</option>
 														<option value="12">12</option>
@@ -281,15 +281,15 @@
 													</select>
 													<select type="text" class="form-select" name="month" id="month" placeholder="Location"required>
 														<option selected disabled value ="">Month ... </option>
-														<option value="1">1</option>
-														<option value="2">2</option>
-														<option value="3">3</option>
-														<option value="4">4</option>
-														<option value="5">5</option>
-														<option value="6">6</option>
-														<option value="7">7</option>
-														<option value="8">8</option>
-														<option value="9">9</option>
+														<option value="01">1</option>
+														<option value="02">2</option>
+														<option value="03">3</option>
+														<option value="04">4</option>
+														<option value="05">5</option>
+														<option value="06">6</option>
+														<option value="07">7</option>
+														<option value="08">8</option>
+														<option value="09">9</option>
 														<option value="10">10</option>
 														<option value="11">11</option>
 														<option value="12">12</option>
@@ -413,6 +413,74 @@
 									</tbody>
 								</table>
 							</div>
+							<br>
+							<h4>Following Tasks</h4>
+							<div class="overflow-auto" style="width: 1300px; height: 600px; overflow: auto;">
+								<table class="col-12">
+									<thead>
+										<tr>
+											<th scope="col">Title</th>
+											<th scope="col">Due Date</th>
+											<th scope="col">Due Time</th>
+											<th scope="col">Pet</th>
+											<th scope="col">Content</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody id="resultTasks2">
+										<script>
+											//XMLHttpRequest object can be used to request data from a web server
+											//create the request
+											var xhttp = new XMLHttpRequest();
+											//function to be executed every time the status of the request object changes
+											xhttp.onreadystatechange = function(){
+												//when these conditions are met then the response is ready
+												if(this.readyState == 4 && this.status == 200){
+													//the response text returns the server response as a string
+													document.getElementById("resultTasks2").innerHTML = this.responseText;
+												}
+											};
+											var url = "http://localhost:8080/Pawlendar/rest/getTasksFollowing/" + localStorage.getItem("emailLoggedin");
+											xhttp.open("GET", url, true);
+											xhttp.send();
+										</script>
+									</tbody>
+								</table>
+							</div>
+							<br>
+							<h4>Archived</h4>
+							<div class="overflow-auto" style="width: 1300px; height: 600px; overflow: auto;">
+								<table class="col-12">
+									<thead>
+										<tr>
+											<th scope="col">Title</th>
+											<th scope="col">Due Date</th>
+											<th scope="col">Due Time</th>
+											<th scope="col">Pet</th>
+											<th scope="col">Content</th>
+											<th scope="col">Action</th>
+										</tr>
+									</thead>
+									<tbody id="resultTasks3">
+										<script>
+											//XMLHttpRequest object can be used to request data from a web server
+											//create the request
+											var xhttp = new XMLHttpRequest();
+											//function to be executed every time the status of the request object changes
+											xhttp.onreadystatechange = function(){
+												//when these conditions are met then the response is ready
+												if(this.readyState == 4 && this.status == 200){
+													//the response text returns the server response as a string
+													document.getElementById("resultTasks3").innerHTML = this.responseText;
+												}
+											};
+											var url = "http://localhost:8080/Pawlendar/rest/getTasksArchived/" + localStorage.getItem("emailLoggedin");
+											xhttp.open("GET", url, true);
+											xhttp.send();
+										</script>
+									</tbody>
+								</table>
+							</div>
 							<script>
 								function removeTask(i){
 									//XMLHttpRequest object can be used to request data from a web server
@@ -427,6 +495,25 @@
 										}
 									};
 									var url = "http://localhost:8080/Pawlendar/rest/removeTask/" + i + "/" + localStorage.getItem("emailLoggedin");
+									xhttp.open("DELETE", url, true);
+									xhttp.send();
+									window.location.reload();
+								}
+							</script>
+							<script>
+								function archiveTask(i){
+									//XMLHttpRequest object can be used to request data from a web server
+									//create the request
+									var xhttp = new XMLHttpRequest();
+									//function to be executed every time the status of the request object changes
+									xhttp.onreadystatechange = function(){
+										//when these conditions are met then the response is ready
+										if(this.readyState == 4 && this.status == 200){
+											//the response text returns the server response as a string
+											window.location.reload();
+										}
+									};
+									var url = "http://localhost:8080/Pawlendar/rest/archiveTask/" + i + "/" + localStorage.getItem("emailLoggedin");
 									xhttp.open("DELETE", url, true);
 									xhttp.send();
 									window.location.reload();

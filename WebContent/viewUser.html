@@ -301,8 +301,41 @@
 										xhttp.send();
 									</script>
 								</tbody>
-							</table>
-						</div>	
+							</table>	
+						<br>
+							<h4>Following Tasks</h4>
+							<div class="overflow-auto" style="width: 1300px; height: 600px; overflow: auto;">
+								<table class="col-12">
+									<thead>
+										<tr>
+											<th scope="col">Title</th>
+											<th scope="col">Due Date</th>
+											<th scope="col">Due Time</th>
+											<th scope="col">Pet</th>
+											<th scope="col">Content</th>
+										</tr>
+									</thead>
+									<tbody id="resultTasks2">
+										<script>
+											//XMLHttpRequest object can be used to request data from a web server
+											//create the request
+											var xhttp = new XMLHttpRequest();
+											//function to be executed every time the status of the request object changes
+											xhttp.onreadystatechange = function(){
+												//when these conditions are met then the response is ready
+												if(this.readyState == 4 && this.status == 200){
+													//the response text returns the server response as a string
+													document.getElementById("resultTasks2").innerHTML = this.responseText;
+												}
+											};
+											var url = "http://localhost:8080/Pawlendar/rest/getTasksFollowing/" + email;
+											xhttp.open("GET", url, true);
+											xhttp.send();
+										</script>
+									</tbody>
+								</table>
+							</div>
+							</div>
 						<div class="tab-pane fade" id="followers" role="tabpanel" aria-labelledby="followers-tab">
 							<p id = "resultFollowers">
 							<script>

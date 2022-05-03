@@ -1,8 +1,9 @@
 package webservice;
 
-//imports
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,8 +82,15 @@ public class PawlendarWebService{
   		else {
   			User u = dao.getUserByEmail(email);
   			u.setTimesLoggedIn(u.getTimesLoggedIn() + 1);
+  			boolean found = false;
+  			
   			if(u.getTimesLoggedIn() == 30) {
-  				if(!(u.getBadges().contains(dao.getBadge(6)))) {
+  				for(Badge b : u.getBadges()) {
+  	  				if(b.getId() == 6) {
+  	  					found = true;
+  	  				}
+  	  			}
+  				if(found == false) {
   					u.getBadges().add(dao.getBadge(6));
   				}
   			}
@@ -227,7 +235,7 @@ public class PawlendarWebService{
   	  		for(int i = 0; i < 365; i++) {
   	  			if(dayChosen == 29 && monthChosen == 2) {
   	  				String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-  	  				Task task = new Task(title, date, time, content, pet, false);
+  	  				Task task = new Task(title, date, time, content, pet, false, false);
   	  				dao.persistObject(task);
   	  				toAdd.add(task);
   	  				tasks.add(task);
@@ -236,7 +244,7 @@ public class PawlendarWebService{
   	  			}
   	  			else if(dayChosen == 30 && (monthChosen == 9 || monthChosen == 4 || monthChosen == 6 || monthChosen == 11)) {
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-	  				Task task = new Task(title, date, time, content, pet, false);
+	  				Task task = new Task(title, date, time, content, pet, false, false);
 	  	  			dao.persistObject(task);
 	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
@@ -246,7 +254,7 @@ public class PawlendarWebService{
   	  			else if(dayChosen == 31 && (monthChosen == 1 || monthChosen == 3 || monthChosen == 5 || monthChosen == 7 || monthChosen == 8 || monthChosen == 10)) {
   	  				
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-	  				Task task = new Task(title, date, time, content, pet, false);
+	  				Task task = new Task(title, date, time, content, pet, false, false);
 	  	  			dao.persistObject(task);
 	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
@@ -256,7 +264,7 @@ public class PawlendarWebService{
   	  			else if(dayChosen == 31 && monthChosen == 12) {
   	  				
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-	  				Task task = new Task(title, date, time, content, pet, false);
+	  				Task task = new Task(title, date, time, content, pet, false, false);
 	  	  			dao.persistObject(task);
 	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
@@ -267,7 +275,7 @@ public class PawlendarWebService{
   	  			else {
   	  				
   	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-	  				Task task = new Task(title, date, time, content, pet, false);
+	  				Task task = new Task(title, date, time, content, pet, false, false);
 	  	  			dao.persistObject(task);
 	  	  			toAdd.add(task);
 	  	  			tasks.add(task);
@@ -282,7 +290,7 @@ public class PawlendarWebService{
 	  				yearChosen = yearChosen + 1;
 	  			}
 	  			String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-	  			Task task = new Task(title, date, time, content, pet, false);
+	  			Task task = new Task(title, date, time, content, pet, false, false);
 	  			dao.persistObject(task);
 	  			toAdd.add(task);
 	  			tasks.add(task);
@@ -293,7 +301,7 @@ public class PawlendarWebService{
 	  	  	for(int i = 0; i < 5; i++) {
 	  			
 	  	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-				Task task = new Task(title, date, time, content, pet, false);
+				Task task = new Task(title, date, time, content, pet, false, false);
 	  			dao.persistObject(task);
 	  			toAdd.add(task);
 	  			tasks.add(task);
@@ -302,12 +310,21 @@ public class PawlendarWebService{
   	  	}
   	  	else if(repeat.equals("never")) {
   	  	String date = yearChosen + "-" + monthChosen + "-" + dayChosen;
-			Task task = new Task(title, date, time, content, pet, false);
+			Task task = new Task(title, date, time, content, pet, false, false);
   	  		dao.persistObject(task);
   	  		toAdd.add(task);
   	  		tasks.add(task);
   	  	}
-  	  	
+  	  	boolean found = false;
+  	  	for(Badge b : user.getBadges()) {
+				if(b.getId() == 3) {
+					found = true;
+				}
+			}
+		if(found == false) {
+			user.getBadges().add(dao.getBadge(3));
+		}
+		
   	  	user.setLiveTasks(tasks);
   	  	dao.mergeObject(user);  
   	  	
@@ -343,19 +360,27 @@ public class PawlendarWebService{
   	@DELETE
   	@Path("removeTask/{taskId}/{email}")
   	public void removeTask(@PathParam("email") String email, @PathParam("taskId") int taskId){
-  	  	User user = dao.getUserByEmail(email);
+  		User user = dao.getUserByEmail(email);
   	  	List<Task> tasks = user.getLiveTasks();
   	  	for(Task t : tasks) {
   	  		if(t.getId() == taskId) {
   	  			dao.remove(t);
-  	  			tasks.remove(t);
   	  		}
   	  	}		
-  	  	if(!(user.getBadges().contains(dao.getBadge(3)))) {
-			user.getBadges().add(dao.getBadge(3));
-		}
-  	  	user.setLiveTasks(tasks);
-  	  	dao.mergeObject(user);
+  	}
+  	
+  	//delete a task for the logged in user
+  	@DELETE
+  	@Path("archiveTask/{taskId}/{email}")
+  	public void archiveTask(@PathParam("email") String email, @PathParam("taskId") int taskId){
+  		User user = dao.getUserByEmail(email);
+  	  	List<Task> tasks = user.getLiveTasks();
+  	  	for(Task t : tasks) {
+  	  		if(t.getId() == taskId) {
+  	  			t.setArchived(true);
+  	  			dao.mergeObject(t);
+  	  		}
+  	  	}		
   	}
   	
   	//get tasks for the logged in user
@@ -366,9 +391,245 @@ public class PawlendarWebService{
   		String result = " ";
   		List<Task> tasks = dao.getTasksByEmail(email);
   		Collections.sort(tasks, new sortTasks());
+  		LocalDate todaysDate = LocalDate.now();
+  		String todaysDay = null;
+  		if(todaysDate.getDayOfMonth() == 1) {
+  			todaysDay = "1";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 2) {
+  			todaysDay = "2";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 3) {
+  			todaysDay = "3";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 4) {
+  			todaysDay = "4";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 5) {
+  			todaysDay = "5";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 6) {
+  			todaysDay = "6";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 7) {
+  			todaysDay = "7";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 8) {
+  			todaysDay = "8";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 9) {
+  			todaysDay = "9";
+  		}
+  		
+  		String todaysMonth = null;
+  		if(todaysDate.getMonth().getValue() == 1) {
+  			todaysMonth = "1";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 2) {
+  			todaysMonth = "2";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 3) {
+  			todaysMonth = "3";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 4) {
+  			todaysMonth = "4";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 5) {
+  			todaysMonth = "5";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 6) {
+  			todaysMonth = "6";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 7) {
+  			todaysMonth = "7";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 8) {
+  			todaysMonth = "8";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 9) {
+  			todaysMonth = "9";
+  		}
+  		
+  		String todaysYear = String.valueOf(todaysDate.getYear());
+  		String dateToday = todaysYear + "-" + todaysMonth + "-" + todaysDay;
+  		
   		for(Task t : tasks) {
-  			Pet pet = t.getPet();
-  	  		result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button></td></tr>";	
+  			if(t.isCopied() == false && t.isArchived() == false) {
+	  			if(t.getDate().equals(dateToday)) {
+	  				Pet pet = t.getPet();
+	  				result += "<tr bgcolor=\"orange\"><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button onClick=\"archiveTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-success\">Complete</button></td></tr>";	
+	  			}
+	  			else {
+	  				Pet pet = t.getPet();
+	  				result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button onClick=\"archiveTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-success\">Complete</button></td></tr>";	
+	  			}
+  			}
+  		}
+  		
+  		return result;
+  	}
+  	
+  //get tasks for the logged in user
+  	@GET
+  	@Path("getTasksArchived/{email}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getTasksArchived(@PathParam("email") String email){
+  		String result = " ";
+  		List<Task> tasks = dao.getTasksByEmail(email);
+  		Collections.sort(tasks, new sortTasks());
+  		LocalDate todaysDate = LocalDate.now();
+  		String todaysDay = null;
+  		if(todaysDate.getDayOfMonth() == 1) {
+  			todaysDay = "1";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 2) {
+  			todaysDay = "2";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 3) {
+  			todaysDay = "3";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 4) {
+  			todaysDay = "4";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 5) {
+  			todaysDay = "5";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 6) {
+  			todaysDay = "6";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 7) {
+  			todaysDay = "7";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 8) {
+  			todaysDay = "8";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 9) {
+  			todaysDay = "9";
+  		}
+  		
+  		String todaysMonth = null;
+  		if(todaysDate.getMonth().getValue() == 1) {
+  			todaysMonth = "1";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 2) {
+  			todaysMonth = "2";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 3) {
+  			todaysMonth = "3";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 4) {
+  			todaysMonth = "4";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 5) {
+  			todaysMonth = "5";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 6) {
+  			todaysMonth = "6";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 7) {
+  			todaysMonth = "7";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 8) {
+  			todaysMonth = "8";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 9) {
+  			todaysMonth = "9";
+  		}
+  		
+  		String todaysYear = String.valueOf(todaysDate.getYear());
+  		String dateToday = todaysYear + "-" + todaysMonth + "-" + todaysDay;
+  		
+  		for(Task t : tasks) {
+  			if(t.isArchived() == true) {
+	  			Pet pet = t.getPet();
+	  			result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button></td></tr>";	
+  			}
+  		}
+  		
+  		return result;
+  	}
+  	
+  //get tasks for the logged in user
+  	@GET
+  	@Path("getTasksFollowing/{email}")
+  	@Produces(MediaType.TEXT_HTML)
+  	public String getTasksFollowing(@PathParam("email") String email){
+  		String result = " ";
+  		List<Task> tasks = dao.getTasksByEmail(email);
+  		Collections.sort(tasks, new sortTasks());
+  		LocalDate todaysDate = LocalDate.now();
+  		String todaysDay = null;
+  		if(todaysDate.getDayOfMonth() == 1) {
+  			todaysDay = "1";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 2) {
+  			todaysDay = "2";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 3) {
+  			todaysDay = "3";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 4) {
+  			todaysDay = "4";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 5) {
+  			todaysDay = "5";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 6) {
+  			todaysDay = "6";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 7) {
+  			todaysDay = "7";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 8) {
+  			todaysDay = "8";
+  		}
+  		else if(todaysDate.getDayOfMonth() == 9) {
+  			todaysDay = "9";
+  		}
+  		
+  		String todaysMonth = null;
+  		if(todaysDate.getMonth().getValue() == 1) {
+  			todaysMonth = "1";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 2) {
+  			todaysMonth = "2";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 3) {
+  			todaysMonth = "3";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 4) {
+  			todaysMonth = "4";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 5) {
+  			todaysMonth = "5";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 6) {
+  			todaysMonth = "6";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 7) {
+  			todaysMonth = "7";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 8) {
+  			todaysMonth = "8";
+  		}
+  		else if(todaysDate.getMonth().getValue() == 9) {
+  			todaysMonth = "9";
+  		}
+  		
+  		String todaysYear = String.valueOf(todaysDate.getYear());
+  		String dateToday = todaysYear + "-" + todaysMonth + "-" + todaysDay;
+  		
+  		for(Task t : tasks) {
+  			if(t.isCopied() == true && t.isArchived() == false) {
+	  			if(t.getDate().equals(dateToday)) {
+	  				Pet pet = t.getPet();
+	  				result += "<tr bgcolor=\"orange\"><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button onClick=\"archiveTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-success\">Complete</button></td></tr>";	
+	  			}
+	  			else {
+	  				Pet pet = t.getPet();
+	  				result += "<tr><td><div class=\"overflow-auto\">" + t.getTitle() + "</div></td><td>" + t.getDate() + "</td><td>" + t.getTime() + "</td><td><div class=\"overflow-auto\">" + pet.getName() + "</div></td><td><div class=\"overflow-auto\">" + t.getContent() + "</div><td><button onClick=\"removeTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-danger\">Delete</button><button onClick=\"archiveTask(" + t.getId() + ")\" type=\"submit\" class=\"btn btn-success\">Complete</button></td></tr>";	
+	  			}
+  			}
   		}
   		
   		return result;
@@ -437,9 +698,16 @@ public class PawlendarWebService{
 	  	  		pet.setVet(vet);
 		  	}
 		  	
-		  	if(!(user.getBadges().contains(dao.getBadge(2)))) {
+		  	boolean found2 = false;
+	  	  	for(Badge b : user.getBadges()) {
+					if(b.getId() == 2) {
+						found2 = true;
+					}
+				}
+			if(found2 == false) {
 				user.getBadges().add(dao.getBadge(2));
 			}
+		  	
 		  	
 		  	dao.persistObject(pet);
 		  	pets.add(pet);
@@ -497,9 +765,15 @@ public class PawlendarWebService{
   		}
   		
   		if(number >= 10) {
-  			if(!(user.getBadges().contains(dao.getBadge(5)))) {
-					user.getBadges().add(dao.getBadge(5));
-			}
+  			boolean found = false;
+  	  	  	for(Badge b : user.getBadges()) {
+  					if(b.getId() == 5) {
+  						found = true;
+  					}
+  				}
+  			if(found == false) {
+  				user.getBadges().add(dao.getBadge(5));
+  			}
   		}
   		
   		for(Pet u : followers) {
@@ -675,11 +949,18 @@ public class PawlendarWebService{
   	@Path("unfollowPet/{petId}/{email}")
   	public void unfollowPet(@PathParam("email") String email, @PathParam("petId") int petId){
   	  	User user = dao.getUserByEmail(email);
+  	  	
+  	  	for(Task t : user.getLiveTasks()) {
+  	  		if(t.isCopied() == true) {
+  	  			dao.remove(t);
+  	  		}
+  	  	}
   	  	List<Pet> pets = user.getPets();
   	  	for(Pet p : pets) {
   	  		if(p.getFollowingPetId() == petId) {
   	  			p.setFollowingPetId(0);
   	  			dao.mergeObject(p);
+  	  			
   	  		}
   	  	}	
   	}
@@ -857,7 +1138,14 @@ public class PawlendarWebService{
   				}
   			}
   		}
-  		if(!(u.getBadges().contains(dao.getBadge(4)))) {
+  		
+  		boolean found = false;
+  	  	for(Badge b : u.getBadges()) {
+				if(b.getId() == 4) {
+					found = true;
+				}
+			}
+		if(found == false) {
 			u.getBadges().add(dao.getBadge(4));
 		}
   	}
