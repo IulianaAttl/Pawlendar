@@ -369,7 +369,7 @@ public class PawlendarWebService{
   	  	}		
   	}
   	
-  	//delete a task for the logged in user
+  	//archive a task for the logged in user
   	@DELETE
   	@Path("archiveTask/{taskId}/{email}")
   	public void archiveTask(@PathParam("email") String email, @PathParam("taskId") int taskId){
@@ -469,7 +469,7 @@ public class PawlendarWebService{
   		return result;
   	}
   	
-  //get tasks for the logged in user
+  	//get archived tasks for the logged in user
   	@GET
   	@Path("getTasksArchived/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -549,7 +549,7 @@ public class PawlendarWebService{
   		return result;
   	}
   	
-  //get tasks for the logged in user
+  	//get tasks from the user the logged in user is following
   	@GET
   	@Path("getTasksFollowing/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -635,7 +635,7 @@ public class PawlendarWebService{
   		return result;
   	}
   	
-	//get tasks for the user the logged in user is looking at
+	//get tasks for the user profile the logged in user is looking at
   	@GET
   	@Path("getTasksViewUser/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -814,7 +814,7 @@ public class PawlendarWebService{
   		return result;
   	}
   	
-  //get the pet they are following
+ 	//get the pet they are following
   	@GET
   	@Path("getFollowingView/{email}")
   	@Produces(MediaType.TEXT_HTML)
@@ -891,45 +891,45 @@ public class PawlendarWebService{
   	
   	//follow a pet
   	@POST
-    @Path("followPet/{emailLoggedIn}/{emailViewUser}")
-    @Produces(MediaType.TEXT_HTML)
-    public void followPet(@PathParam("emailLoggedIn") String emailLoggedIn,@PathParam("emailViewUser") String emailViewUser, @FormParam("theirPetList") String theirPetList, @FormParam("myPetList") String myPetList) throws URISyntaxException{
-    	Pet myPet = dao.getPetFromUser(emailLoggedIn, myPetList);
-    	Pet theirPet = dao.getPetFromUser(emailViewUser, theirPetList);
+   	@Path("followPet/{emailLoggedIn}/{emailViewUser}")
+    	@Produces(MediaType.TEXT_HTML)
+    	public void followPet(@PathParam("emailLoggedIn") String emailLoggedIn,@PathParam("emailViewUser") String emailViewUser, @FormParam("theirPetList") String theirPetList, @FormParam("myPetList") String myPetList) throws URISyntaxException{
+    		Pet myPet = dao.getPetFromUser(emailLoggedIn, myPetList);
+    		Pet theirPet = dao.getPetFromUser(emailViewUser, theirPetList);
       
-      	if(myPet.getFollowingPetId() != theirPet.getId()) {
-      		myPet.setFollowingPetId(theirPet.getId());
-          	dao.mergeObject(myPet);
-          	List<Pet> followers = theirPet.getFollowersPets();
-      		followers.add(myPet);
-          	theirPet.setFollowersPets(followers);
-          	dao.mergeObject(theirPet);
-          	List<Task> myTasks = dao.getUserByEmail(emailLoggedIn).getLiveTasks();
-      		List<Task> theirTasks = dao.getUserByEmail(emailViewUser).getLiveTasks();
+      		if(myPet.getFollowingPetId() != theirPet.getId()) {
+      			myPet.setFollowingPetId(theirPet.getId());
+          		dao.mergeObject(myPet);
+          		List<Pet> followers = theirPet.getFollowersPets();
+      			followers.add(myPet);
+          		theirPet.setFollowersPets(followers);
+          		dao.mergeObject(theirPet);
+          		List<Task> myTasks = dao.getUserByEmail(emailLoggedIn).getLiveTasks();
+      			List<Task> theirTasks = dao.getUserByEmail(emailViewUser).getLiveTasks();
       		
-      		for(Task t : myTasks) {
-      			if(t.isCopied()) {
-      				myTasks.remove(t);
-      				dao.remove(t);
+      			for(Task t : myTasks) {
+      				if(t.isCopied()) {
+      					myTasks.remove(t);
+      					dao.remove(t);
+      				}
       			}
-      		}
       		
-      		for(Task t : theirTasks) {
-      			Task newTask = new Task();
-      			newTask.setContent(t.getContent());
-      			newTask.setCopied(true);
-      			newTask.setDate(t.getDate());
-      			newTask.setPet(myPet);
-      			newTask.setTime(t.getTime());
-      			newTask.setTitle(t.getTitle());
-      			dao.persistObject(newTask);
-      			myTasks.add(newTask);
-      		}
-      		User me = dao.getUserByEmail(emailLoggedIn);
-      		me.setLiveTasks(myTasks);
-  			dao.mergeObject(me);
-      	}	
-    }	
+      			for(Task t : theirTasks) {
+      				Task newTask = new Task();
+      				newTask.setContent(t.getContent());
+      				newTask.setCopied(true);
+      				newTask.setDate(t.getDate());
+      				newTask.setPet(myPet);
+      				newTask.setTime(t.getTime());
+      				newTask.setTitle(t.getTitle());
+      				dao.persistObject(newTask);
+      				myTasks.add(newTask);
+      			}
+      			User me = dao.getUserByEmail(emailLoggedIn);
+      			me.setLiveTasks(myTasks);
+  				dao.mergeObject(me);
+      		}	
+    	}	
   	
   	//delete a pet for the logged in user
   	@DELETE
@@ -944,7 +944,7 @@ public class PawlendarWebService{
   	  	}	
   	}
   	
-  	//delete a pet for the logged in user
+  	//unfollow a pet for the logged in user
   	@DELETE
   	@Path("unfollowPet/{petId}/{email}")
   	public void unfollowPet(@PathParam("email") String email, @PathParam("petId") int petId){
