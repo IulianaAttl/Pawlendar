@@ -29,11 +29,11 @@ not have a plan in place, these duties and obligations, financial and time commi
 become highly demanding and overwhelming. 
 
 ## Technologies Used
-Frontend: HTML, CSS, Bootstrap, JavaScript
-Backend: Java
-Database: MySQL
-Server: Apache Tomcat
-Project created in Eclipse
+Frontend: HTML, CSS, Bootstrap, JavaScript  
+Backend: Java  
+Database: MySQL  
+Server: Apache Tomcat  
+Project created in Eclipse  
 
 I chose these technologies because they are the languages and tools that I am most familiar 
 with. I have done HTML, CSS, JAVA and MySQL since my first year in college, and I feel
