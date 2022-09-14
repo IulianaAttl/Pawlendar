@@ -40,3 +40,7 @@ with. I have done HTML, CSS, JAVA and MySQL since my first year in college, and 
 confident in understanding how to implement and use them. During my internship, I also had 
 the opportunity to practice and expand my HTML and CSS knowledge by learning about 
 Bootstrap. 
+
+## Use Case Diagram
+![image](https://user-images.githubusercontent.com/61713643/190253594-5a422bd7-0ad2-444c-8f7e-54a2cfd0c9e2.png)
+
